@@ -168,20 +168,21 @@ const AppointmentsPage = () => {
                         </div>
                     </div>
 
-                    <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
+                    <div className="flex gap-2 sm:gap-4 md:flex-row w-full">
+                        <div className="relative flex-1 min-w-0">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted shrink-0" />
                             <input
                                 type="text"
-                                placeholder="Search appointments..."
-                                className="input-base pl-10 h-10 text-sm"
+                                placeholder="Search..."
+                                className="input-base pl-9 h-10 text-sm w-full"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button className="btn-secondary h-10 px-3 flex-1 sm:flex-none text-sm">
-                                <Calendar className="w-4 h-4" /> <span className="sm:hidden lg:inline">Date Range</span>
+                        <div className="flex items-center shrink-0">
+                            <button className="btn-secondary h-10 px-3 flex items-center gap-2 text-sm max-w-[120px] sm:max-w-none">
+                                <Calendar className="w-4 h-4 shrink-0" />
+                                <span className="hidden sm:inline truncate">Date Range</span>
                             </button>
                         </div>
                     </div>
@@ -204,6 +205,52 @@ const AppointmentsPage = () => {
                         "Status",
                         { content: "Action", className: "text-right" }
                     ]}
+                    mobileContent={filteredAppointments.length > 0 ? filteredAppointments.map((apt, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-xl border border-brand-border shadow-soft flex flex-col gap-3 relative">
+                            <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                                        checked={selectedIds.includes(apt.id)}
+                                        onChange={() => toggleSelect(apt.id)}
+                                    />
+                                    <span className="font-bold text-navy text-sm">{apt.id}</span>
+                                </div>
+                                <StatusBadge status={apt.status} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Patient</span>
+                                    <span className="text-sm font-semibold text-charcoal">{apt.patient}</span>
+                                    <span className="text-[10px] text-brand-muted truncate block">{apt.email}</span>
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Doctor</span>
+                                    <span className="text-sm font-semibold text-charcoal">{apt.doctor}</span>
+                                    <span className="text-[10px] text-brand-muted truncate block">{apt.specialty}</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-1 mt-1">
+                                <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Schedule</span>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5 text-navy font-medium text-sm">
+                                        <Calendar className="w-4 h-4 text-brand-muted" /> {formatDate(apt.date)} at {apt.time}
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className={cn("px-2 py-1 rounded text-[10px] font-bold", apt.type === 'First Visit' ? 'bg-blue-50 text-primary' : 'bg-brand-bg text-charcoal')}>{apt.type}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="pt-3 border-t border-brand-border mt-1">
+                                <button className="w-full btn-secondary text-xs sm:text-sm py-2" onClick={() => openDetails(apt)}>View Details</button>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="p-8 text-center text-brand-muted">
+                            <p className="font-bold text-navy text-base">No appointments found</p>
+                        </div>
+                    )}
                 >
                     {filteredAppointments.length > 0 ? filteredAppointments.map((apt, idx) => (
                         <tr key={idx} className={cn("hover:bg-brand-bg/30 transition-colors group cursor-pointer", selectedIds.includes(apt.id) ? "bg-primary/5 hover:bg-primary/10" : "")} onClick={(e) => {

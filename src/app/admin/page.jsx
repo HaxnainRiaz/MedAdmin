@@ -133,6 +133,32 @@ const DashboardPage = () => {
                                 "Status",
                                 { content: "Action", className: "hidden space-x-1 sm:table-cell text-right" }
                             ]}
+                            mobileContent={recentAppointments.map((apt, idx) => (
+                                <div key={idx} className="bg-white p-4 rounded-xl border border-brand-border shadow-soft flex flex-col gap-3">
+                                    <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+                                        <span className="font-bold text-navy text-sm">{apt.id}</span>
+                                        <StatusBadge status={apt.status} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Patient</span>
+                                            <span className="text-sm font-semibold text-charcoal">{apt.patient}</span>
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Doctor</span>
+                                            <span className="text-sm font-semibold text-charcoal">{apt.doctor}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-3 mt-1 border-t border-brand-border">
+                                        <div className="flex items-center gap-1.5 text-navy font-medium text-sm">
+                                            <Clock className="w-4 h-4 text-brand-muted" /> {apt.time}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button className="text-primary text-xs font-bold px-2 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">Manage</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         >
                             {recentAppointments.map((apt, idx) => (
                                 <tr key={idx} className="hover:bg-brand-bg/50 space-x-1 transition-colors group relative">

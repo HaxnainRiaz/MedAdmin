@@ -11,18 +11,18 @@ const StatusBadge = ({ status, variant = "default" }) => {
             case "active":
             case "completed":
             case "resolved":
-                return "bg-emerald-100 p-2  rounded-lg text-emerald-700 border-emerald-200";
+                return "bg-emerald-100 text-emerald-700 border-emerald-200";
             case "pending":
             case "draft":
             case "in progress":
             case "waiting":
-                return "bg-orange-100 p-2 rounded-lg text-orange-700 border-orange-200";
+                return "bg-orange-100 text-orange-700 border-orange-200";
             case "cancelled":
             case "no-show":
             case "rejected":
             case "spam":
             case "inactive":
-                return "bg-red-100 p-2 rounded-lg text-red-700 border-red-200";
+                return "bg-red-100 text-red-700 border-red-200";
             case "scheduled":
                 return "bg-blue-100 text-blue-700 border-blue-200";
             default:
@@ -31,8 +31,8 @@ const StatusBadge = ({ status, variant = "default" }) => {
     };
 
     return (
-        <span className={cn("status-badge border", getStyles())}>
-            <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded border", getStyles())}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-75"></span>
             {status}
         </span>
     );

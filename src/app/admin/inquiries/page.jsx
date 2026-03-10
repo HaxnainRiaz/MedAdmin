@@ -152,6 +152,57 @@ const InquiriesPage = () => {
                         { content: "Assignee", className: "hidden md:table-cell" },
                         { content: "Actions", className: "text-right" }
                     ]}
+                    mobileContent={filteredInquiries.length > 0 ? filteredInquiries.map((inq, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-xl border border-brand-border shadow-soft flex flex-col gap-4 relative">
+                            <div className="flex flex-col gap-1 pr-20">
+                                <h3 className="text-sm font-bold text-navy leading-tight">{inq.subject}</h3>
+                                <span className="text-[10px] text-brand-muted font-bold bg-brand-bg px-2 py-0.5 rounded w-fit uppercase tracking-wider mt-1">{inq.type}</span>
+                            </div>
+                            <div className="absolute top-4 right-4">
+                                <StatusBadge status={inq.status} />
+                            </div>
+                            <div className="flex flex-col gap-2 pt-3 border-t border-brand-border">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex flex-col min-w-0 flex-1">
+                                        <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Sender</span>
+                                        <span className="text-sm font-semibold text-charcoal truncate pr-2">{inq.name}</span>
+                                        <span className="text-[10px] text-brand-muted truncate block pr-2">{inq.email}</span>
+                                    </div>
+                                    <div className="flex flex-col items-end shrink-0">
+                                        <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Priority</span>
+                                        <div className={cn(
+                                            "flex items-center gap-1.5 text-xs font-bold",
+                                            inq.priority === "High" ? "text-red-600" :
+                                                inq.priority === "Medium" ? "text-orange-600" : "text-blue-600"
+                                        )}>
+                                            <Flag className="w-3.5 h-3.5 fill-current" />
+                                            {inq.priority}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between pt-3 mt-1 border-t border-brand-border">
+                                {inq.owner === "Unassigned" ? (
+                                    <button className="text-[10px] font-black text-primary flex items-center gap-1 uppercase tracking-tight" onClick={(e) => { e.stopPropagation(); handleAssign(inq.id, "John Admin") }}>
+                                        <UserCheck className="w-3.5 h-3.5" /> Assign Me
+                                    </button>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-6 h-6 rounded-full bg-blue-100 text-primary flex items-center justify-center text-[10px] font-bold">
+                                            {inq.owner.charAt(0)}
+                                        </div>
+                                        <span className="text-xs text-charcoal font-medium">{inq.owner}</span>
+                                    </div>
+                                )}
+                                <button className="px-4 py-1.5 btn-secondary text-xs" onClick={() => openDetails(inq)}>Manage</button>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="p-8 text-center text-brand-muted flex flex-col items-center">
+                            <MessageSquare className="w-10 h-10 text-brand-border mb-3" />
+                            <p className="font-bold text-navy text-base">No inquiries found</p>
+                        </div>
+                    )}
                 >
                     {filteredInquiries.length > 0 ? filteredInquiries.map((inq, idx) => (
                         <tr key={idx} onClick={() => openDetails(inq)} className="hover:bg-brand-bg/30 transition-colors group cursor-pointer">

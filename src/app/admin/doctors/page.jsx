@@ -162,6 +162,60 @@ const DoctorsPage = () => {
                         "Status",
                         { content: "Actions", className: "text-right" }
                     ]}
+                    mobileContent={filteredDoctors.length > 0 ? filteredDoctors.map((doc, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-xl border border-brand-border shadow-soft flex flex-col gap-4">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200 shrink-0">
+                                    <Stethoscope className="w-5 h-5 text-primary" />
+                                </div>
+                                <div className="flex flex-col flex-1 min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="text-sm font-bold text-navy truncate">{doc.name}</span>
+                                        {doc.featured && <span className="bg-yellow-100 text-yellow-700 text-[10px] font-black uppercase px-2 py-0.5 rounded">Featured</span>}
+                                    </div>
+                                    <span className="text-[12px] text-brand-muted mt-0.5">{doc.title}</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Specialty</span>
+                                    <span className="text-sm font-semibold text-charcoal">{doc.specialty}</span>
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Experience & Rating</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[11px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{doc.experience}Yrs</span>
+                                        <span className="flex items-center gap-1 text-[11px] font-bold text-charcoal">
+                                            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                            {doc.rating}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Consultation Modes</span>
+                                <div className="flex flex-wrap gap-2">
+                                    {doc.modes.map((m, i) => (
+                                        <span key={i} className="px-2 py-1 bg-brand-bg rounded-lg text-xs font-semibold text-charcoal">{m}</span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-4 mt-1 border-t border-brand-border">
+                                <StatusBadge status={doc.status} />
+                                <div className="flex items-center gap-2">
+                                    <button className="px-4 py-1.5 btn-secondary text-xs" onClick={() => openEditModal(doc)}>Edit Profile</button>
+                                </div>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="p-8 text-center text-brand-muted flex flex-col items-center">
+                            <Stethoscope className="w-10 h-10 text-brand-border mb-3" />
+                            <p className="font-bold text-navy text-base">No doctors found</p>
+                        </div>
+                    )}
                 >
                     {filteredDoctors.length > 0 ? filteredDoctors.map((doc, idx) => (
                         <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
