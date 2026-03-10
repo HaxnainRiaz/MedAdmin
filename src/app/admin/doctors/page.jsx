@@ -24,16 +24,17 @@ import {
     Users,
     Activity,
     Video,
-    Shield
+    Shield,
+    ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/admin-utils";
 import DoctorDetailPanel from "@/components/admin/doctors/DoctorDetailPanel";
 
 const initialDoctors = [
-    { id: "DOC-001", name: "Dr. Robert Smith", title: "Senior Cardiologist", specialty: "Cardiology", experience: "15", rating: 4.9, reviews: 120, status: "Active", featured: true, modes: ["In-Person", "Video"], languages: ["English", "Spanish"] },
-    { id: "DOC-002", name: "Dr. Lisa Wong", title: "Dermatology Specialist", specialty: "Dermatology", experience: "8", rating: 4.7, reviews: 85, status: "Active", featured: false, modes: ["In-Person", "Video"], languages: ["English", "Mandarin"] },
-    { id: "DOC-003", name: "Dr. Michael Chen", title: "Pediatric Surgeon", specialty: "Pediatrics", experience: "12", rating: 4.8, reviews: 94, status: "Inactive", featured: false, modes: ["In-Person"], languages: ["English", "Cantonese"] },
-    { id: "DOC-004", name: "Dr. Sarah Miller", title: "Neurologist", specialty: "Neurology", experience: "10", rating: 5.0, reviews: 56, status: "Active", featured: true, modes: ["In-Person", "Video"], languages: ["English", "French"] },
+    { id: "DOC-001", name: "Dr. Robert Smith", title: "Senior Cardiologist", specialty: "Cardiology", experience: "15", rating: 4.9, reviews: 120, status: "Active", featured: true, modes: ["In-Person", "Video"], languages: ["English", "Spanish"], acceptedInsurances: ["Blue Cross", "Aetna", "Cigna"] },
+    { id: "DOC-002", name: "Dr. Lisa Wong", title: "Dermatology Specialist", specialty: "Dermatology", experience: "8", rating: 4.7, reviews: 85, status: "Active", featured: false, modes: ["In-Person", "Video"], languages: ["English", "Mandarin"], acceptedInsurances: ["UnitedHealthcare", "Aetna"] },
+    { id: "DOC-003", name: "Dr. Michael Chen", title: "Pediatric Surgeon", specialty: "Pediatrics", experience: "12", rating: 4.8, reviews: 94, status: "Inactive", featured: false, modes: ["In-Person"], languages: ["English", "Cantonese"], acceptedInsurances: ["Blue Cross", "Cigna"] },
+    { id: "DOC-004", name: "Dr. Sarah Miller", title: "Neurologist", specialty: "Neurology", experience: "10", rating: 5.0, reviews: 56, status: "Active", featured: true, modes: ["In-Person", "Video"], languages: ["English", "French"], acceptedInsurances: ["All Major Insurance"] },
 ];
 
 const DoctorsPage = () => {

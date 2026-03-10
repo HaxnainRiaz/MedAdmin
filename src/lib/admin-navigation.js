@@ -21,6 +21,7 @@ import {
     BarChart3,
     History,
     Route,
+    ShieldPlus,
 } from "lucide-react";
 
 export const adminNavigation = [
@@ -37,6 +38,7 @@ export const adminNavigation = [
             { name: "Doctors", href: "/admin/doctors", icon: Stethoscope },
             { name: "Specialties", href: "/admin/specialties", icon: Shapes },
             { name: "Services", href: "/admin/services", icon: BriefcaseMedical },
+            { name: "Insurance", href: "/admin/insurance", icon: ShieldPlus },
             { name: "Locations", href: "/admin/locations", icon: MapPin },
         ],
     },

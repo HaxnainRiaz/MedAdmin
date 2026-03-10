@@ -16,7 +16,8 @@ import {
     RefreshCw,
     Ban,
     ChevronRight,
-    History
+    History,
+    ShieldCheck
 } from "lucide-react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import { cn, formatDate } from "@/lib/admin-utils";
@@ -97,6 +98,24 @@ export default function AppointmentDetailPanel({ appointment, onClose, onUpdateS
                                 <Phone className="w-4 h-4 text-brand-muted shrink-0" />
                                 {appointment.phone}
                             </div>
+                            {/* Insurance Verification Detail in Panel */}
+                            {appointment.insurance && (
+                                <div className="mt-4 pt-4 border-t border-brand-border">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <ShieldCheck className={cn("w-4 h-4", appointment.insurance.status === 'Verified' ? "text-emerald-500" : "text-brand-muted")} />
+                                            <span className="text-[10px] font-black text-brand-muted uppercase tracking-wider">Insurance Summary</span>
+                                        </div>
+                                        <StatusBadge status={appointment.insurance.status} variant="dot" />
+                                    </div>
+                                    <div className="p-3 bg-white rounded-xl border border-brand-border shadow-soft">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-black text-navy">{appointment.insurance.provider}</span>
+                                            <span className="text-[10px] font-bold text-brand-muted mt-1">{appointment.insurance.plan}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>

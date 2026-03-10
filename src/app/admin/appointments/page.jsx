@@ -9,6 +9,7 @@ import {
     Filter,
     Download,
     Plus,
+    ShieldPlus,
     MoreHorizontal,
     Mail,
     Phone,
@@ -23,21 +24,23 @@ import {
     UserCircle,
     FileText,
     CreditCard,
+    ShieldCheck,
     LayoutList,
     Grid,
     ChevronDown,
     Trash2,
-    RefreshCw
+    RefreshCw,
+    ShieldAlert
 } from "lucide-react";
 import { cn, formatDate } from "@/lib/admin-utils";
 import AppointmentDetailPanel from "@/components/admin/appointments/AppointmentDetailPanel";
 
 const initialAppointments = [
-    { id: "APT-1042", patient: "Sarah Johnson", email: "sarah.j@example.com", phone: "+1 (555) 123-4567", doctor: "Dr. Robert Smith", specialty: "Cardiology", date: "2024-03-24", time: "09:00 AM", mode: "In-Person", source: "Website", status: "Confirmed", payment: "Paid", notes: "First time visit, complained about mild chest pain." },
-    { id: "APT-1041", patient: "Michael Brown", email: "m.brown@gmail.com", phone: "+1 (555) 987-6543", doctor: "Dr. Lisa Wong", specialty: "Dermatology", date: "2024-03-24", time: "10:30 AM", mode: "Video", source: "Mobile App", status: "Pending", payment: "Unpaid", notes: "Routine skin checkup." },
-    { id: "APT-1040", patient: "Emma Davis", email: "emma.d@outlook.com", phone: "+1 (555) 456-7890", doctor: "Dr. Robert Smith", specialty: "Cardiology", date: "2024-03-24", time: "11:15 AM", mode: "In-Person", source: "Website", status: "Confirmed", payment: "Paid", notes: "Follow up on ECG results." },
-    { id: "APT-1039", patient: "David Wilson", email: "david.w@example.com", phone: "+1 (555) 222-3333", doctor: "Dr. Sarah Miller", specialty: "Pediatrics", date: "2024-03-25", time: "03:00 PM", mode: "In-Person", source: "Direct", status: "Cancelled", payment: "Refunded", notes: "Patient cancelled due to conflict." },
-    { id: "APT-1038", patient: "Olivia Martinez", email: "olivia.m@example.com", phone: "+1 (555) 888-9999", doctor: "Dr. Lisa Wong", specialty: "Dermatology", date: "2024-03-25", time: "04:30 PM", mode: "Video", source: "Website", status: "Confirmed", payment: "Paid", notes: "" },
+    { id: "APT-1042", patient: "Sarah Johnson", email: "sarah.j@example.com", phone: "+1 (555) 123-4567", doctor: "Dr. Robert Smith", specialty: "Cardiology", date: "2024-03-24", time: "09:00 AM", mode: "In-Person", source: "Website", status: "Confirmed", payment: "Paid", insurance: { provider: "Blue Cross", plan: "Bronze PPO", status: "Verified" }, notes: "First time visit, complained about mild chest pain." },
+    { id: "APT-1041", patient: "Michael Brown", email: "m.brown@gmail.com", phone: "+1 (555) 987-6543", doctor: "Dr. Lisa Wong", specialty: "Dermatology", date: "2024-03-24", time: "10:30 AM", mode: "Video", source: "Mobile App", status: "Pending", payment: "Unpaid", insurance: { provider: "Aetna", plan: "Silver HMO", status: "Pending" }, notes: "Routine skin checkup." },
+    { id: "APT-1040", patient: "Emma Davis", email: "emma.d@outlook.com", phone: "+1 (555) 456-7890", doctor: "Dr. Robert Smith", specialty: "Cardiology", date: "2024-03-24", time: "11:15 AM", mode: "In-Person", source: "Website", status: "Confirmed", payment: "Paid", insurance: { provider: "Cigna", plan: "Open Access Plus", status: "Verified" }, notes: "Follow up on ECG results." },
+    { id: "APT-1039", patient: "David Wilson", email: "david.w@example.com", phone: "+1 (555) 222-3333", doctor: "Dr. Sarah Miller", specialty: "Pediatrics", date: "2024-03-25", time: "03:00 PM", mode: "In-Person", source: "Direct", status: "Cancelled", payment: "Refunded", insurance: { provider: "None", plan: "Self-Pay", status: "N/A" }, notes: "Patient cancelled due to conflict." },
+    { id: "APT-1038", patient: "Olivia Martinez", email: "olivia.m@example.com", phone: "+1 (555) 888-9999", doctor: "Dr. Lisa Wong", specialty: "Dermatology", date: "2024-03-25", time: "04:30 PM", mode: "Video", source: "Website", status: "Confirmed", payment: "Paid", insurance: { provider: "UnitedHealthcare", plan: "Standard HMO", status: "Verified" }, notes: "" },
 ];
 
 const tabs = ["All", "Pending", "Confirmed", "Completed", "Cancelled"];
@@ -158,8 +161,8 @@ const AppointmentsPage = () => {
                             <Grid className="w-4 h-4" />
                         </button>
                     </div>
-                    <button className="btn-secondary flex-1 sm:flex-none py-2 px-3 text-xs sm:text-sm whitespace-nowrap">
-                        <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <button className="btn-secondary h-10 px-3 text-brand-muted hover:text-navy hidden sm:flex items-center gap-2">
+                        <Download className="w-4 h-4" />
                         Export
                     </button>
                     <button className="btn-primary flex-1 sm:flex-none py-2 px-3 text-xs sm:text-sm whitespace-nowrap">
@@ -303,18 +306,13 @@ const AppointmentsPage = () => {
                             <DataTable
                                 headers={[
                                     <input
+                                        key="select-all"
                                         type="checkbox"
                                         className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
                                         onChange={toggleSelectAll}
                                         checked={selectedIds.length === filteredAppointments.length && filteredAppointments.length > 0}
                                     />,
-                                    "Ref ID",
-                                    "Patient",
-                                    "Doctor",
-                                    "Schedule",
-                                    "Type",
-                                    "Status",
-                                    { content: "Action", className: "text-right" }
+                                    "Apt ID", "Patient", "Insurance", "Doctor", "Schedule", "Mode", "Status", { content: "Actions", className: "text-right" }
                                 ]}
                                 mobileContent={filteredAppointments.length > 0 ? filteredAppointments.map((apt, idx) => (
                                     <div key={idx} className="bg-white p-4 rounded-xl border border-brand-border shadow-soft flex flex-col gap-3 relative">
@@ -347,9 +345,6 @@ const AppointmentsPage = () => {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-1.5 text-navy font-medium text-sm">
                                                     <Calendar className="w-4 h-4 text-brand-muted" /> {formatDate(apt.date)} at {apt.time}
-                                                </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className={cn("px-2 py-1 rounded text-[10px] font-bold", apt.type === 'First Visit' ? 'bg-blue-50 text-primary' : 'bg-brand-bg text-charcoal')}>{apt.type}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -385,6 +380,15 @@ const AppointmentsPage = () => {
                                             <div className="flex flex-col min-w-[120px]">
                                                 <span className="text-[13px] font-semibold text-navy">{apt.patient}</span>
                                                 <span className="text-[11px] text-brand-muted">{apt.email}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="flex flex-col min-w-[110px]">
+                                                <div className="flex items-center gap-1.5">
+                                                    <ShieldCheck className={cn("w-3.5 h-3.5", apt.insurance.status === 'Verified' ? "text-emerald-500" : "text-brand-muted")} />
+                                                    <span className="text-[12px] font-bold text-navy">{apt.insurance.provider}</span>
+                                                </div>
+                                                <StatusBadge status={apt.insurance.status} variant="dot" />
                                             </div>
                                         </td>
                                         <td>
@@ -446,7 +450,7 @@ const AppointmentsPage = () => {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="8" className="px-6 py-12 text-center text-brand-muted">
+                                        <td colSpan="9" className="px-6 py-12 text-center text-brand-muted">
                                             <div className="flex flex-col items-center justify-center">
                                                 <Calendar className="w-10 h-10 text-brand-border mb-3" />
                                                 <p className="font-bold text-navy text-base">No appointments found</p>
@@ -579,6 +583,42 @@ const AppointmentsPage = () => {
                                             {activeApt.mode === "Video" ? <Video className="w-4 h-4 text-purple-600" /> : <MapPin className="w-4 h-4 text-blue-600" />}
                                             {activeApt.mode} Consultation
                                         </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Insurance Coverage Section */}
+                            <div className="md:col-span-2 space-y-4 pt-6 border-t border-brand-border">
+                                <h4 className="text-[11px] font-black text-brand-muted uppercase tracking-widest flex items-center gap-2"><ShieldPlus className="w-4 h-4 text-primary" /> Insurance Coverage & Billing</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div className="p-4 bg-brand-bg rounded-xl border border-brand-border group hover:border-primary/30 transition-all">
+                                        <p className="text-[9px] font-black text-brand-muted uppercase tracking-widest mb-2 opacity-50">Provider & Plan</p>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-brand-border shadow-premium-sm text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                                <ShieldCheck className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-navy leading-none">{activeApt.insurance.provider}</p>
+                                                <p className="text-[10px] font-bold text-brand-muted mt-1">{activeApt.insurance.plan}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-brand-bg rounded-xl border border-brand-border group hover:border-emerald-500/30 transition-all">
+                                        <p className="text-[9px] font-black text-brand-muted uppercase tracking-widest mb-2 opacity-50">Verification Status</p>
+                                        <div className="flex items-center gap-3">
+                                            <StatusBadge status={activeApt.insurance.status} />
+                                            <span className="text-[10px] font-black text-brand-muted uppercase opacity-40">Auto-Checked</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-navy text-white rounded-xl shadow-premium group hover:scale-[1.02] transition-all">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <p className="text-[9px] font-black text-white/50 uppercase tracking-widest">Est. Copay</p>
+                                            <ShieldPlus className="w-3.5 h-3.5 text-emerald-400 opacity-50" />
+                                        </div>
+                                        <div className="flex items-baseline gap-2">
+                                            <p className="text-xl font-black">$25.00</p>
+                                            <span className="text-[9px] font-black text-white/40 uppercase">Fixed PPO</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -24,7 +24,8 @@ import {
     Zap,
     PlusCircle,
     FileDown,
-    ShieldAlert
+    ShieldAlert,
+    ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/admin-utils";
 import DashboardCharts from "@/components/admin/dashboard/DashboardCharts";
@@ -35,7 +36,7 @@ const DashboardPage = () => {
 
     const kpis = [
         { title: "Today's Appointments", value: "24", trend: "up", trendValue: "+12%", icon: Calendar, color: "blue" },
-        { title: "New Inquiries", value: "18", trend: "up", trendValue: "+5%", icon: MessageSquare, color: "purple" },
+        { title: "Pending Insurances", value: "12", trend: "up", trendValue: "+3", icon: ShieldAlert, color: "red" },
         { title: "Active Doctors", value: "42", trend: "down", trendValue: "-2%", icon: Stethoscope, color: "green" },
         { title: "Total Subscribers", value: "1,280", trend: "up", trendValue: "+24%", icon: Users, color: "orange" },
     ];
@@ -49,6 +50,7 @@ const DashboardPage = () => {
 
     const [alerts, setAlerts] = useState([
         { id: 1, title: "Dr. Smith Unavailable", desc: "Emergency leave today. 4 appointments need rescheduling.", type: "error" },
+        { id: 4, title: "Insurance Verification Needed", desc: "8 patients for tomorrow haven't had their insurance verified yet.", type: "warning" },
         { id: 2, title: "Broken Route Alert", desc: "/blog/health-tips is returning 404.", type: "warning" },
         { id: 3, title: "Subscribers Export Ready", desc: "The requested CSV file is ready for download.", type: "success" },
     ]);
