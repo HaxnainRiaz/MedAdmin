@@ -16,6 +16,7 @@ import {
     Trash2
 } from "lucide-react";
 import { useToast } from "@/components/admin/shared/ToastProvider";
+import { cn } from "@/lib/admin-utils";
 
 const initialPages = [
     { id: "PG-1", title: "Home", slug: "/", type: "Landing", status: "Published", updated: "2h ago", seoScore: "95" },
@@ -24,6 +25,7 @@ const initialPages = [
     { id: "PG-4", title: "Insurance Info", slug: "/insurance", type: "Standard", status: "Draft", updated: "1d ago", seoScore: "45" },
     { id: "PG-5", title: "Careers", slug: "/careers", type: "Standard", status: "Archived", updated: "1mo ago", seoScore: "70" },
 ];
+
 
 const PagesPage = () => {
     const { triggerToast } = useToast();
@@ -83,12 +85,15 @@ const PagesPage = () => {
         setIsModalOpen(false);
     };
 
+    const publishedCount = pages.filter(p => p.status === "Published").length;
+    const avgSeo = Math.round(pages.reduce((acc, p) => acc + parseInt(p.seoScore), 0) / pages.length);
+
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">Website Pages</h2>
-                    <p className="text-brand-muted text-sm">Manage standard content pages, SEO meta data, and routing.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">Website Pages</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage standard content pages, SEO meta data, and routing.</p>
                 </div>
                 <button
                     className="btn-primary"
@@ -99,94 +104,111 @@ const PagesPage = () => {
                 </button>
             </div>
 
+            {/* KPI Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                {[
+                    { label: "Total Pages", value: pages.length, icon: FileText, color: "text-blue-500" },
+                    { label: "Live Pages", value: publishedCount, icon: Globe, color: "text-emerald-500" },
+                    { label: "Avg. SEO Score", value: `${avgSeo}/100`, icon: Eye, color: "text-orange-500" },
+                ].map((stat, idx) => {
+                    const Icon = stat.icon;
+                    return (
+                        <div key={idx} className="admin-card p-4 sm:p-6 group hover:border-primary/50 transition-all cursor-pointer">
+                            <div className="flex items-center justify-between mb-2 min-w-0">
+                                <span className="text-[10px] sm:text-xs font-bold text-brand-muted uppercase tracking-wider truncate shrink-0">{stat.label}</span>
+                                <Icon className={cn("w-4 h-4 sm:w-5 sm:h-5", stat.color)} />
+                            </div>
+                            <span className="text-2xl sm:text-3xl font-black text-navy leading-none truncate block">{stat.value}</span>
+                        </div>
+                    );
+                })}
+            </div>
+
             <div className="admin-card overflow-hidden">
-                <div className="p-4 border-b border-brand-border flex flex-wrap items-center justify-between gap-4">
-                    <div className="relative flex-1 min-w-[300px]">
+                <div className="p-3 sm:p-4 border-b border-brand-border flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="relative flex-1 w-full max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
-                        <input type="text" placeholder="Search pages by title or slug..." className="input-base pl-10 h-10" />
+                        <input type="text" placeholder="Search pages by title or slug..." className="input-base pl-10 h-10 text-sm" />
                     </div>
-                    <select className="input-base h-10 text-sm w-40">
-                        <option>All Page Types</option>
-                        <option>Landing</option>
-                        <option>Standard</option>
-                        <option>System</option>
-                    </select>
+                    <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+                        <select className="input-base h-10 text-xs sm:text-sm w-full sm:w-40 min-w-[140px]">
+                            <option>All Page Types</option>
+                            <option>Landing</option>
+                            <option>Standard</option>
+                            <option>System</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Page Information</th>
-                                <th className="px-6 py-4">Route Path</th>
-                                <th className="px-6 py-4">Template</th>
-                                <th className="px-6 py-4">Status & Quality</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {pages.map((page, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-brand-bg rounded-xl flex items-center justify-center border border-brand-border shrink-0 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                                                <FileText className="w-5 h-5" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-navy">{page.title}</span>
-                                                <span className="text-[10px] text-brand-muted font-bold">Last updated {page.updated}</span>
-                                            </div>
+                <DataTable
+                    headers={[
+                        "Page Information",
+                        "Route Path",
+                        "Template",
+                        "Status & Quality",
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {pages.map((page, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-brand-bg rounded-lg sm:rounded-xl flex items-center justify-center border border-brand-border shrink-0 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                        <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-xs sm:text-sm font-bold text-navy truncate max-w-[120px] sm:max-w-none">{page.title}</span>
+                                        <span className="text-[9px] sm:text-[10px] text-brand-muted font-bold truncate">Update {page.updated}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div className="flex items-center gap-1.5 px-2 py-0.5 sm:py-1 bg-brand-bg border border-brand-border rounded-lg inline-flex max-w-[100px] sm:max-w-[150px] overflow-hidden">
+                                    <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-muted shrink-0" />
+                                    <span className="text-[10px] sm:text-xs font-mono text-charcoal truncate">{page.slug}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span className="text-[10px] sm:text-xs font-bold text-navy bg-white border border-brand-border px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">{page.type}</span>
+                            </td>
+                            <td>
+                                <div className="flex flex-col gap-1.5">
+                                    <StatusBadge status={page.status} />
+                                    <div className="flex flex-col min-w-[60px] sm:min-w-[100px]">
+                                        <span className={`text-[8px] sm:text-[9px] font-black tracking-widest uppercase ${parseInt(page.seoScore) > 80 ? 'text-emerald-500' : 'text-orange-500'}`}>
+                                            SEO {page.seoScore}%
+                                        </span>
+                                        <div className="w-full sm:w-16 h-1 bg-brand-bg rounded-full mt-0.5 overflow-hidden">
+                                            <div className={`h-full ${parseInt(page.seoScore) > 80 ? 'bg-emerald-500' : 'bg-orange-500'}`} style={{ width: `${parseInt(page.seoScore)}%` }}></div>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 px-2 py-1 bg-brand-bg border border-brand-border rounded-lg inline-flex max-w-[150px] overflow-hidden">
-                                            <Lock className="w-3 h-3 text-brand-muted shrink-0" />
-                                            <span className="text-xs font-mono text-charcoal truncate">{page.slug}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-xs font-bold text-navy bg-white border border-brand-border px-2 py-1 rounded-md">{page.type}</span>
-                                    </td>
-                                    <td className="px-6 py-4 flex items-center gap-4">
-                                        <div className="min-w-[80px]">
-                                            <StatusBadge status={page.status} />
-                                        </div>
-                                        <div className="flex flex-col min-w-[100px]">
-                                            <span className={`text-[10px] font-black tracking-widest uppercase ${parseInt(page.seoScore) > 80 ? 'text-emerald-500' : 'text-orange-500'}`}>
-                                                SEO {page.seoScore}/100
-                                            </span>
-                                            <div className="w-16 h-1 bg-brand-bg rounded-full mt-1 overflow-hidden">
-                                                <div className={`h-full ${parseInt(page.seoScore) > 80 ? 'bg-emerald-500' : 'bg-orange-500'}`} style={{ width: `${parseInt(page.seoScore)}%` }}></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                className="p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy"
-                                                onClick={() => triggerToast(`Previewing ${page.title}...`, "info")}
-                                            >
-                                                <Globe className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                className="p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary"
-                                                onClick={() => openEditModal(page)}
-                                            >
-                                                <Edit3 className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500"
-                                                onClick={() => handleDelete(page.id)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td className="text-right">
+                                <div className="flex items-center justify-end gap-1 sm:gap-2">
+                                    <button
+                                        className="p-1 sm:p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy"
+                                        onClick={() => triggerToast(`Previewing ${page.title}...`, "info")}
+                                    >
+                                        <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                    <button
+                                        className="p-1 sm:p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary"
+                                        onClick={() => openEditModal(page)}
+                                    >
+                                        <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                    <button
+                                        className="p-1 sm:p-1.5 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500"
+                                        onClick={() => handleDelete(page.id)}
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </DataTable>
             </div>
 
             <Modal

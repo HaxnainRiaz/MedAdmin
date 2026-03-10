@@ -17,6 +17,8 @@ import {
     CheckCircle2
 } from "lucide-react";
 
+import { cn } from "@/lib/admin-utils";
+
 export const initialLocations = [
     { id: "LOC-01", name: "Main Clinic Centre", address: "123 Healthcare Blvd, Downtown, Metropolis", phone: "+1 (555) 123-4567", hours: "Mon-Sat: 8AM-8PM", status: "Active", primary: true },
     { id: "LOC-02", name: "Westside Branch", address: "456 Wellness Way, Westside, Metropolis", phone: "+1 (555) 987-6543", hours: "Mon-Fri: 9AM-6PM", status: "Active", primary: false },
@@ -26,6 +28,7 @@ export const initialLocations = [
 const LocationsPage = () => {
     const { triggerToast } = useToast();
     const [locations, setLocations] = useState(initialLocations);
+    const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingLocation, setEditingLocation] = useState(null);
 
@@ -76,15 +79,20 @@ const LocationsPage = () => {
         setIsModalOpen(false);
     };
 
+    const filteredLocations = locations.filter(loc =>
+        loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        loc.address.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">Clinic Locations</h2>
-                    <p className="text-brand-muted text-sm">Manage physical clinic branches, addresses, and hours.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">Clinic Network</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage physical clinic branches, addresses, and hours.</p>
                 </div>
                 <button
-                    className="btn-primary"
+                    className="btn-primary h-10 px-4 text-xs sm:text-sm"
                     onClick={openCreateModal}
                 >
                     <Plus className="w-4 h-4" />
@@ -92,56 +100,85 @@ const LocationsPage = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {locations.map((loc, idx) => (
-                    <div key={idx} className="admin-card p-6 relative overflow-hidden group hover:shadow-premium transition-all">
+            {/* KPI Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                {[
+                    { label: "Total Centers", value: locations.length },
+                    { label: "Active Nodes", value: locations.filter(l => l.status === 'Active').length },
+                    { label: "Maintenance", value: locations.filter(l => l.status === 'Maintenance').length },
+                    { label: "Primary HQ", value: locations.filter(l => l.primary).length }
+                ].map((stat, idx) => (
+                    <div key={idx} className="admin-card p-3 sm:p-4 flex flex-col">
+                        <span className="text-[10px] sm:text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1 truncate">{stat.label}</span>
+                        <span className="text-lg sm:text-xl font-bold text-navy">{stat.value}</span>
+                    </div>
+                ))}
+            </div>
+
+            {/* Filter Bar */}
+            <div className="admin-card p-3 sm:p-4">
+                <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
+                    <input
+                        type="text"
+                        placeholder="Search locations by name or address..."
+                        className="input-base pl-10 h-10 text-sm"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                {filteredLocations.length > 0 ? filteredLocations.map((loc, idx) => (
+                    <div key={idx} className="admin-card p-4 sm:p-6 relative overflow-hidden group hover:shadow-premium transition-all">
                         {loc.primary && (
-                            <div className="absolute top-4 right-4 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase px-2 py-1 rounded-md">
+                            <div className="absolute top-4 right-4 bg-emerald-100 text-emerald-700 text-[9px] sm:text-[10px] font-black uppercase px-2 py-1 rounded-md">
                                 Primary Branch
                             </div>
                         )}
 
-                        <div className="flex items-start gap-4 mb-6">
-                            <div className="w-14 h-14 bg-brand-bg rounded-2xl flex items-center justify-center border border-brand-border text-primary shrink-0 group-hover:scale-105 transition-transform">
-                                <Building2 className="w-7 h-7" />
+                        <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
+                            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-brand-bg rounded-xl sm:rounded-2xl flex items-center justify-center border border-brand-border text-primary shrink-0 group-hover:scale-105 transition-transform">
+                                <Building2 className="w-5 h-5 sm:w-7 sm:h-7" />
                             </div>
-                            <div className="pt-1 pr-6">
-                                <h3 className="text-xl font-bold text-navy mb-1">{loc.name}</h3>
+                            <div className="pt-0.5 sm:pt-1 pr-12">
+                                <h3 className="text-base sm:text-xl font-bold text-navy mb-1 line-clamp-1">{loc.name}</h3>
                                 <StatusBadge status={loc.status} />
                             </div>
                         </div>
 
-                        <div className="space-y-3 mb-6">
-                            <div className="flex items-start gap-3">
-                                <MapPin className="w-4 h-4 text-brand-muted shrink-0 mt-0.5" />
-                                <span className="text-sm font-medium text-charcoal">{loc.address}</span>
+                        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                            <div className="flex items-start gap-2 sm:gap-3">
+                                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-muted shrink-0 mt-0.5" />
+                                <span className="text-xs sm:text-sm font-medium text-charcoal">{loc.address}</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <PhoneCall className="w-4 h-4 text-brand-muted shrink-0" />
-                                <span className="text-sm font-medium text-charcoal">{loc.phone}</span>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-muted shrink-0" />
+                                <span className="text-xs sm:text-sm font-medium text-charcoal">{loc.phone}</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <Clock className="w-4 h-4 text-brand-muted shrink-0" />
-                                <span className="text-sm font-medium text-charcoal">{loc.hours}</span>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-muted shrink-0" />
+                                <span className="text-xs sm:text-sm font-medium text-charcoal">{loc.hours}</span>
                             </div>
                         </div>
 
-                        <div className="border-t border-brand-border pt-4 flex items-center justify-between">
+                        <div className="border-t border-brand-border pt-3 sm:pt-4 flex items-center justify-between">
                             <button
-                                className="text-xs font-bold text-brand-muted hover:text-navy flex items-center gap-2"
+                                className="text-[10px] sm:text-xs font-bold text-brand-muted hover:text-navy flex items-center gap-1.5 sm:gap-2"
                                 onClick={() => triggerToast(`Opening map for ${loc.name}`, "info")}
                             >
-                                <Route className="w-4 h-4" /> View Map
+                                <Route className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> View Map
                             </button>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
                                 <button
-                                    className="p-1.5 hover:bg-red-50 text-brand-muted hover:text-red-500 rounded-lg transition-colors"
+                                    className="p-1.5 sm:p-2 hover:bg-red-50 text-brand-muted hover:text-red-500 rounded-lg transition-colors shrink-0"
                                     onClick={() => handleDelete(loc.id)}
                                 >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </button>
                                 <button
-                                    className="btn-secondary py-1.5 px-3 text-xs"
+                                    className="btn-secondary py-1 text-[10px] sm:text-xs px-2 sm:px-3 h-8 sm:h-9"
                                     onClick={() => openEditModal(loc)}
                                 >
                                     Edit Details
@@ -149,18 +186,24 @@ const LocationsPage = () => {
                             </div>
                         </div>
                     </div>
-                ))}
+                )) : (
+                    <div className="lg:col-span-2 admin-card p-12 text-center">
+                        <MapPin className="w-12 h-12 text-brand-border mx-auto mb-3" />
+                        <p className="font-bold text-navy text-lg">No locations found</p>
+                        <p className="text-sm text-brand-muted mt-1">Try adjusting your search query.</p>
+                    </div>
+                )}
 
                 {/* Empty State / Add New */}
                 <button
-                    className="admin-card p-6 border-dashed border-2 hover:border-primary/50 hover:bg-brand-bg/50 transition-colors flex flex-col items-center justify-center text-center min-h-[280px]"
+                    className="admin-card p-4 sm:p-6 border-dashed border-2 hover:border-primary/50 hover:bg-brand-bg/50 transition-colors flex flex-col items-center justify-center text-center min-h-[220px] sm:min-h-[280px]"
                     onClick={openCreateModal}
                 >
-                    <div className="w-16 h-16 bg-brand-bg rounded-full flex items-center justify-center mb-4 text-brand-muted">
-                        <Plus className="w-8 h-8" />
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-brand-bg rounded-full flex items-center justify-center mb-3 sm:mb-4 text-brand-muted">
+                        <Plus className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
-                    <h3 className="text-lg font-bold text-navy mb-2">Add New Location</h3>
-                    <p className="text-sm text-brand-muted max-w-xs">Open a new branch or add an administrative office to your network.</p>
+                    <h3 className="text-base sm:text-lg font-bold text-navy mb-1 sm:mb-2">Add New Location</h3>
+                    <p className="text-[11px] sm:text-sm text-brand-muted max-w-xs px-2">Open a new branch or add an administrative office to your network.</p>
                 </button>
             </div>
 

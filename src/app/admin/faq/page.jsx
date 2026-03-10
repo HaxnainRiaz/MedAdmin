@@ -14,6 +14,7 @@ import {
     Trash2,
     CheckCircle2
 } from "lucide-react";
+import { cn } from "@/lib/admin-utils";
 
 const initialFaqs = [
     { id: "FAQ-1", question: "Do you accept international insurance?", answer: "Yes, we accept a variety of international insurance plans. Please contact our billing department to verify your specific provider and coverage ahead of your visit.", category: "Billing", status: "Published", views: 1250 },
@@ -27,6 +28,7 @@ const FaqPage = () => {
     const [faqs, setFaqs] = useState(initialFaqs);
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All Categories");
+    const [selectedIds, setSelectedIds] = useState([]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingFaq, setEditingFaq] = useState(null);
@@ -39,6 +41,40 @@ const FaqPage = () => {
     const triggerToast = () => {
         setShowSuccessToast(true);
         setTimeout(() => setShowSuccessToast(false), 3000);
+    };
+
+    // Selection Handlers
+    const toggleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedIds(filteredFaqs.map(f => f.id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const toggleSelect = (id) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(selId => selId !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    // Bulk Actions
+    const handleBulkDelete = () => {
+        if (confirm(`Are you sure you want to delete ${selectedIds.length} FAQs?`)) {
+            setFaqs(faqs.filter(f => !selectedIds.includes(f.id)));
+            setSelectedIds([]);
+            triggerToast();
+        }
+    };
+
+    const handleBulkStatusChange = (newStatus) => {
+        setFaqs(faqs.map(f =>
+            selectedIds.includes(f.id) ? { ...f, status: newStatus } : f
+        ));
+        setSelectedIds([]);
+        triggerToast();
     };
 
     const categories = ["All Categories", ...Array.from(new Set(initialFaqs.map(f => f.category)))];
@@ -90,57 +126,76 @@ const FaqPage = () => {
         <div className="space-y-6 relative">
             {/* Success Toast */}
             {showSuccessToast && (
-                <div className="fixed top-24 right-8 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-premium flex items-center gap-3 z-50 animate-in fade-in slide-in-from-top-4">
-                    <CheckCircle2 className="w-5 h-5" />
+                <div className="fixed top-24 right-8 bg-navy text-white px-6 py-3 rounded-xl shadow-premium flex items-center gap-3 z-50 animate-in fade-in slide-in-from-top-4 border border-white/10">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     <span className="font-bold text-sm">FAQ updated successfully!</span>
                 </div>
             )}
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">Frequently Asked Questions</h2>
-                    <p className="text-brand-muted text-sm">Manage help center articles and patient support queries.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">Help Center FAQs</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage help center articles and patient support queries.</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
-                        Manage Categories
+                <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-auto">
+                    <button className="btn-secondary h-10 px-4 text-xs sm:text-sm">
+                        Categories
                     </button>
-                    <button className="btn-primary" onClick={openCreateModal}>
+                    <button className="btn-primary h-10 px-4 text-xs sm:text-sm" onClick={openCreateModal}>
                         <Plus className="w-4 h-4" />
                         Add FAQ
                     </button>
                 </div>
             </div>
 
+            {/* KPI Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                {[
+                    { label: "Total Articles", value: faqs.length, color: "blue" },
+                    { label: "Total Views", value: faqs.reduce((acc, f) => acc + (f.views || 0), 0), color: "purple" },
+                    { label: "Published", value: faqs.filter(f => f.status === 'Published').length, color: "green" },
+                    { label: "Drafts", value: faqs.filter(f => f.status === 'Draft').length, color: "orange" }
+                ].map((stat, idx) => (
+                    <div key={idx} className="admin-card p-3 sm:p-4 flex flex-col">
+                        <span className="text-[10px] sm:text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1 truncate">{stat.label}</span>
+                        <span className="text-lg sm:text-xl font-bold text-navy">{stat.value.toLocaleString()}</span>
+                    </div>
+                ))}
+            </div>
+
             <div className="admin-card overflow-hidden">
-                <div className="p-4 border-b border-brand-border space-y-4">
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
-                            <input
-                                type="text"
-                                placeholder="Search questions or answers..."
-                                className="input-base pl-10"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <select
-                                className="input-base text-sm w-48"
-                                value={categoryFilter}
-                                onChange={(e) => setCategoryFilter(e.target.value)}
-                            >
-                                {categories.map((cat, idx) => (
-                                    <option key={idx} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
+                <div className="p-3 sm:p-4 border-b border-brand-border flex flex-col lg:flex-row gap-3 sm:gap-4 items-center justify-between">
+                    <div className="relative flex-1 w-full lg:max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
+                        <input
+                            type="text"
+                            placeholder="Search questions or answers..."
+                            className="input-base pl-10 h-10 text-sm"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 w-full lg:w-auto">
+                        <select
+                            className="input-base text-xs sm:text-sm h-10 flex-1 lg:w-48"
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                        >
+                            {categories.map((cat, idx) => (
+                                <option key={idx} value={cat}>{cat}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 
                 <DataTable
                     headers={[
+                        <input
+                            type="checkbox"
+                            className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                            onChange={toggleSelectAll}
+                            checked={selectedIds.length === filteredFaqs.length && filteredFaqs.length > 0}
+                        />,
                         "Question",
                         "Category",
                         "Status & Reach",
@@ -148,15 +203,23 @@ const FaqPage = () => {
                     ]}
                 >
                     {filteredFaqs.length > 0 ? filteredFaqs.map((faq, idx) => (
-                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                        <tr key={idx} className={cn("hover:bg-brand-bg/30 transition-colors group cursor-pointer", selectedIds.includes(faq.id) ? "bg-primary/5" : "")} onClick={() => openEditModal(faq)}>
+                            <td onClick={(e) => e.stopPropagation()}>
+                                <input
+                                    type="checkbox"
+                                    className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                                    checked={selectedIds.includes(faq.id)}
+                                    onChange={() => toggleSelect(faq.id)}
+                                />
+                            </td>
                             <td>
                                 <div className="flex items-start gap-3">
                                     <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 shrink-0 group-hover:bg-primary group-hover:text-white transition-colors mt-0.5">
                                         <CircleHelp className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-navy hover:text-primary cursor-pointer transition-colors" onClick={() => openEditModal(faq)}>{faq.question}</p>
-                                        <p className="text-xs text-charcoal mt-1 line-clamp-1 max-w-[400px]">{faq.answer}</p>
+                                        <p className="text-sm font-bold text-navy hover:text-primary transition-colors">{faq.question}</p>
+                                        <p className="text-xs text-charcoal mt-1 line-clamp-1 max-w-[250px] sm:max-w-[400px]">{faq.answer}</p>
                                     </div>
                                 </div>
                             </td>
@@ -166,13 +229,13 @@ const FaqPage = () => {
                                 </div>
                             </td>
                             <td className="align-top">
-                                <div className="flex flex-col gap-1.5">
+                                <div className="flex flex-col gap-1.5 min-w-[100px]">
                                     <StatusBadge status={faq.status} />
-                                    <span className="text-[10px] font-black tracking-widest uppercase text-brand-muted">{faq.views} views</span>
+                                    <span className="text-[10px] font-black tracking-widest uppercase text-brand-muted">{faq.views.toLocaleString()} views</span>
                                 </div>
                             </td>
-                            <td className="text-right align-top">
-                                <div className="flex items-center justify-end gap-2">
+                            <td className="text-right align-top" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1">
                                     <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary" onClick={() => openEditModal(faq)}>
                                         <Edit2 className="w-4 h-4" />
                                     </button>
@@ -184,13 +247,30 @@ const FaqPage = () => {
                         </tr>
                     )) : (
                         <tr>
-                            <td colSpan="4" className="px-6 py-12 text-center text-brand-muted">
-                                <CircleHelp className="w-12 h-12 text-brand-border mx-auto mb-3" />
-                                <p className="font-bold text-navy text-lg">No FAQs found</p>
+                            <td colSpan="5" className="px-6 py-12 text-center text-brand-muted">
+                                <div className="flex flex-col items-center justify-center">
+                                    <CircleHelp className="w-10 h-10 text-brand-border mb-3" />
+                                    <p className="font-bold text-navy text-base">No FAQs found</p>
+                                </div>
                             </td>
                         </tr>
                     )}
                 </DataTable>
+
+                {/* Bulk Action Bar */}
+                {selectedIds.length > 0 && (
+                    <div className="p-3 sm:p-4 bg-navy text-white flex flex-col sm:flex-row items-center justify-between gap-3 animate-in slide-in-from-bottom-2">
+                        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                            <span className="text-xs sm:text-sm font-medium whitespace-nowrap">{selectedIds.length} FAQs selected</span>
+                            <div className="flex items-center gap-2 flex-1">
+                                <button className="flex-1 sm:flex-none px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-[11px] font-bold transition-colors" onClick={() => handleBulkStatusChange('Published')}>Publish</button>
+                                <button className="flex-1 sm:flex-none px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[11px] font-bold transition-colors" onClick={() => handleBulkStatusChange('Draft')}>Draft</button>
+                                <button className="flex-1 sm:flex-none px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-[11px] font-bold transition-colors" onClick={handleBulkDelete}>Delete</button>
+                            </div>
+                        </div>
+                        <button className="text-[11px] text-white/60 hover:text-white transition-colors underline" onClick={() => setSelectedIds([])}>Clear selection</button>
+                    </div>
+                )}
             </div>
 
             {/* Create/Edit FAQ Modal */}

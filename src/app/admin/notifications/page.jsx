@@ -63,24 +63,21 @@ const NotificationsPage = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">Notifications Center</h2>
-                    <p className="text-brand-muted text-sm flex items-center gap-2">
-                        Manage system alerts and team activity notifications.
-                        {unreadCount > 0 && <span className="text-xs font-black text-primary bg-primary/10 px-2 py-0.5 rounded-full">{unreadCount} unread</span>}
-                    </p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">Notifications Center</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage system alerts and team activity notifications.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-auto">
                     <button
-                        className="btn-secondary"
+                        className="btn-secondary h-10 px-3 sm:px-4 text-xs sm:text-sm"
                         onClick={() => triggerToast("Alert preference settings opened", "info")}
                     >
                         <Settings className="w-4 h-4" />
-                        Alert Preferences
+                        <span className="hidden sm:inline">Preferences</span>
                     </button>
                     <button
-                        className="btn-primary"
+                        className="btn-primary h-10 px-3 sm:px-4 text-xs sm:text-sm"
                         onClick={markAllRead}
                         disabled={unreadCount === 0}
                     >
@@ -90,16 +87,36 @@ const NotificationsPage = () => {
                 </div>
             </div>
 
+            {/* KPI Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                {[
+                    { label: "Total Notifications", value: notifications.length },
+                    { label: "Unread Alerts", value: unreadCount },
+                    { label: "System Alerts", value: notifications.filter(n => n.type === 'system').length },
+                    { label: "Clinic Updates", value: notifications.filter(n => n.type === 'appointment').length }
+                ].map((stat, idx) => (
+                    <div key={idx} className="admin-card p-3 sm:p-4 flex flex-col">
+                        <span className="text-[10px] sm:text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1 truncate">{stat.label}</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg sm:text-xl font-bold text-navy">{stat.value}</span>
+                            {stat.label === "Unread Alerts" && stat.value > 0 && (
+                                <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
             <div className="admin-card overflow-hidden">
-                <div className="p-4 border-b border-brand-border space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex items-center bg-brand-bg p-1 rounded-xl">
+                <div className="p-3 sm:p-4 border-b border-brand-border space-y-4">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="flex items-center bg-brand-bg p-1 rounded-xl overflow-x-auto no-scrollbar">
                             {["All", "Unread", "System", "Appointments"].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={cn(
-                                        "px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5",
+                                        "px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap",
                                         activeTab === tab
                                             ? "bg-white text-primary shadow-sm"
                                             : "text-brand-muted hover:text-navy"
@@ -113,12 +130,12 @@ const NotificationsPage = () => {
                             ))}
                         </div>
 
-                        <div className="relative">
+                        <div className="relative w-full lg:max-w-xs">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
                             <input
                                 type="text"
                                 placeholder="Search notifications..."
-                                className="input-base pl-10"
+                                className="input-base pl-10 h-10 text-sm"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -131,28 +148,28 @@ const NotificationsPage = () => {
                         <div
                             key={idx}
                             className={cn(
-                                "p-5 flex items-start gap-4 transition-colors hover:bg-brand-bg/30 group cursor-pointer",
+                                "p-3 sm:p-5 flex items-start gap-3 sm:gap-4 transition-colors hover:bg-brand-bg/30 group cursor-pointer",
                                 !notif.read && "bg-primary/5"
                             )}
                             onClick={() => markAsRead(notif.id)}
                         >
                             <div className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center shrink-0 border",
-                                notif.read ? "bg-brand-bg border-brand-border" : "bg-white border-primary/20 shadow-sm"
+                                "w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 border transition-all",
+                                notif.read ? "bg-brand-bg border-brand-border" : "bg-white border-primary/20 shadow-sm ring-2 ring-primary/5"
                             )}>
                                 {getTypeIcon(notif.type)}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
                                     <h4 className={cn("text-sm font-bold truncate", notif.read ? "text-navy" : "text-primary")}>{notif.title}</h4>
-                                    <span className="text-[10px] text-brand-muted font-bold tracking-widest uppercase shrink-0">{notif.date}</span>
+                                    <span className="text-[9px] sm:text-[10px] text-brand-muted font-bold tracking-widest uppercase shrink-0">{notif.date}</span>
                                 </div>
-                                <p className="text-sm text-charcoal mt-1 line-clamp-2">{notif.message}</p>
+                                <p className="text-xs sm:text-sm text-charcoal mt-1 line-clamp-2">{notif.message}</p>
                             </div>
                             <div className="shrink-0 flex items-center gap-2">
                                 {!notif.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0"></div>}
                                 <button
-                                    className="p-1.5 hover:bg-red-50 rounded-lg text-brand-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="p-1.5 hover:bg-red-50 rounded-lg text-brand-muted hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                     onClick={(e) => { e.stopPropagation(); dismiss(notif.id); }}
                                     title="Dismiss"
                                 >

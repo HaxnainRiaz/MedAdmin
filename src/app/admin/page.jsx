@@ -20,9 +20,14 @@ import {
     ExternalLink,
     Eye,
     X,
-    ChevronRight
+    ChevronRight,
+    Zap,
+    PlusCircle,
+    FileDown,
+    ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/admin-utils";
+import DashboardCharts from "@/components/admin/dashboard/DashboardCharts";
 
 const DashboardPage = () => {
     const router = useRouter();
@@ -105,8 +110,61 @@ const DashboardPage = () => {
             {/* KPI Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {kpis.map((kpi, idx) => (
-                    <KpiCard key={idx} {...kpi} />
+                    <KpiCard key={idx} {...kpi} clickable onClick={() => router.push(kpi.color === "blue" ? "/admin/appointments" : kpi.color === "purple" ? "/admin/inquiries" : kpi.color === "green" ? "/admin/doctors" : "/admin/subscribers")} />
                 ))}
+            </div>
+
+            {/* Quick Actions & Charts */}
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 lg:gap-8">
+                <div className="xl:col-span-3">
+                    <DashboardCharts />
+                </div>
+                <div className="xl:col-span-1 space-y-6">
+                    <div className="admin-card p-4 sm:p-6 bg-primary text-white">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Zap className="w-5 h-5 text-yellow-300" />
+                            <h3 className="text-lg font-bold">Quick Actions</h3>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                            <button
+                                onClick={() => setIsBookingOpen(true)}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-semibold group"
+                            >
+                                <div className="p-2 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
+                                    <PlusCircle className="w-4 h-4" />
+                                </div>
+                                Book Appointment
+                            </button>
+                            <button
+                                onClick={() => router.push("/admin/blog/new")}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-semibold group"
+                            >
+                                <div className="p-2 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
+                                    <MessageSquare className="w-4 h-4" />
+                                </div>
+                                Create Blog Post
+                            </button>
+                            <button
+                                onClick={() => router.push("/admin/subscribers/export")}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-semibold group"
+                            >
+                                <div className="p-2 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
+                                    <FileDown className="w-4 h-4" />
+                                </div>
+                                Export Subscribers
+                            </button>
+                            <button
+                                onClick={() => router.push("/admin/audit-logs")}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-semibold group"
+                            >
+                                <div className="p-2 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
+                                    <ShieldAlert className="w-4 h-4" />
+                                </div>
+                                System Audit
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 overflow-x-hidden">

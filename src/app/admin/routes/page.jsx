@@ -68,67 +68,69 @@ const RouteRegistryPage = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy flex items-center gap-2">
-                        <Route className="w-6 h-6 text-primary" /> Route Registry
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy flex items-center gap-2">
+                        <Route className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Route Registry
                     </h2>
-                    <p className="text-brand-muted text-sm mt-1">Manage physical app routing, dynamic paths, and system redirects.</p>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage app routing, dynamic paths, and system redirects.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-auto">
                     {warningCount > 0 && (
                         <button
-                            className="btn-secondary text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100"
+                            className="btn-secondary h-10 px-3 text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 text-xs sm:text-sm"
                             onClick={resolveWarnings}
                         >
-                            <AlertTriangle className="w-4 h-4" /> Resolve {warningCount} Warning{warningCount > 1 ? "s" : ""}
+                            <AlertTriangle className="w-4 h-4" /> Resolve <span className="hidden sm:inline">Warnings</span>
                         </button>
                     )}
                     <button
-                        className="btn-primary"
+                        className="btn-primary h-10 px-4 text-xs sm:text-sm"
                         onClick={() => setIsCreateModalOpen(true)}
                     >
                         <Plus className="w-4 h-4" />
-                        Register Route
+                        <span className="hidden sm:inline">Register Route</span>
+                        <span className="sm:hidden">Register</span>
                     </button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {/* KPI Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {[
-                    { label: "Total Active Routes", value: routes.filter(r => r.status === "Active").length, icon: Route, color: "text-blue-500" },
-                    { label: "Dynamic Paths", value: routes.filter(r => r.isDynamic).length, icon: RefreshCcw, color: "text-purple-500" },
-                    { label: "Warnings", value: warningCount, icon: AlertTriangle, color: "text-red-500", warning: warningCount > 0 },
+                    { label: "Active Routes", value: routes.filter(r => r.status === "Active").length, icon: Route, color: "text-blue-500", warning: false },
+                    { label: "Dynamic Paths", value: routes.filter(r => r.isDynamic).length, icon: RefreshCcw, color: "text-purple-500", warning: false },
+                    { label: "System Warnings", value: warningCount, icon: AlertTriangle, color: "text-red-500", warning: warningCount > 0 },
                 ].map((stat, idx) => {
                     const Icon = stat.icon;
                     return (
-                        <div key={idx} className={cn("admin-card p-6 border-t-4", stat.warning ? "border-red-500" : "border-primary")}>
+                        <div key={idx} className={cn("admin-card p-4 sm:p-6 transition-all", stat.warning ? "ring-1 ring-red-500/20 bg-red-50/5" : "")}>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-bold text-brand-muted uppercase tracking-wider">{stat.label}</span>
-                                <Icon className={cn("w-5 h-5", stat.color)} />
+                                <span className="text-[10px] sm:text-xs font-bold text-brand-muted uppercase tracking-wider truncate">{stat.label}</span>
+                                <Icon className={cn("w-4 h-4 sm:w-5 sm:h-5", stat.color)} />
                             </div>
-                            <span className="text-3xl font-black text-navy leading-none">{stat.value}</span>
+                            <span className="text-2xl sm:text-3xl font-black text-navy leading-none">{stat.value}</span>
                         </div>
                     );
                 })}
             </div>
 
             <div className="admin-card overflow-hidden">
-                <div className="p-4 border-b border-brand-border space-y-4">
-                    <div className="flex justify-between items-center text-sm gap-4">
-                        <div className="relative flex-1 max-w-sm">
+                <div className="p-3 sm:p-4 border-b border-brand-border space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="relative flex-1 max-w-sm w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
                             <input
                                 type="text"
                                 placeholder="Search paths or components..."
-                                className="input-base pl-10 h-10"
+                                className="input-base pl-10 h-10 text-sm"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="flex items-center gap-4 text-xs font-bold text-brand-muted">
-                            <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Active</span>
-                            <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500"></div> Warnings</span>
+                        <div className="flex items-center gap-3 text-[10px] sm:text-xs font-bold text-brand-muted overflow-x-auto no-scrollbar whitespace-nowrap">
+                            <span className="flex items-center gap-1.5 px-2 py-1 bg-brand-bg rounded-lg border border-brand-border"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Active</span>
+                            <span className="flex items-center gap-1.5 px-2 py-1 bg-brand-bg rounded-lg border border-brand-border"><div className="w-2 h-2 rounded-full bg-orange-500"></div> Warnings</span>
                         </div>
                     </div>
                 </div>

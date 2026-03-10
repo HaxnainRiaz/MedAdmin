@@ -22,9 +22,15 @@ import {
     Video,
     UserCircle,
     FileText,
-    CreditCard
+    CreditCard,
+    LayoutList,
+    Grid,
+    ChevronDown,
+    Trash2,
+    RefreshCw
 } from "lucide-react";
 import { cn, formatDate } from "@/lib/admin-utils";
+import AppointmentDetailPanel from "@/components/admin/appointments/AppointmentDetailPanel";
 
 const initialAppointments = [
     { id: "APT-1042", patient: "Sarah Johnson", email: "sarah.j@example.com", phone: "+1 (555) 123-4567", doctor: "Dr. Robert Smith", specialty: "Cardiology", date: "2024-03-24", time: "09:00 AM", mode: "In-Person", source: "Website", status: "Confirmed", payment: "Paid", notes: "First time visit, complained about mild chest pain." },
@@ -44,18 +50,34 @@ const AppointmentsPage = () => {
     // Selection state
     const [selectedIds, setSelectedIds] = useState([]);
 
-    // Modal states
+    // View states
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isSplitView, setIsSplitView] = useState(false);
     const [activeApt, setActiveApt] = useState(null);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
+    const [viewMode, setViewMode] = useState("table"); // table, calendar
 
-    // Filtering
+    // Advanced Filters
+    const [filters, setFilters] = useState({
+        doctor: "All",
+        specialty: "All",
+        mode: "All",
+        payment: "All"
+    });
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    // Filtering logic
     const filteredAppointments = appointments.filter(apt => {
         const matchesTab = activeTab === "All" || apt.status === activeTab;
         const matchesSearch = apt.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
             apt.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
             apt.doctor.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesTab && matchesSearch;
+        const matchesDoctor = filters.doctor === "All" || apt.doctor === filters.doctor;
+        const matchesSpecialty = filters.specialty === "All" || apt.specialty === filters.specialty;
+        const matchesMode = filters.mode === "All" || apt.mode === filters.mode;
+        const matchesPayment = filters.payment === "All" || apt.payment === filters.payment;
+
+        return matchesTab && matchesSearch && matchesDoctor && matchesSpecialty && matchesMode && matchesPayment;
     });
 
     const triggerToast = () => {
@@ -98,7 +120,11 @@ const AppointmentsPage = () => {
 
     const openDetails = (apt) => {
         setActiveApt(apt);
-        setIsDetailModalOpen(true);
+        if (window.innerWidth > 1024) {
+            setIsSplitView(true);
+        } else {
+            setIsDetailModalOpen(true);
+        }
     };
 
     return (
@@ -118,6 +144,20 @@ const AppointmentsPage = () => {
                     <p className="text-brand-muted text-xs sm:text-sm">Manage bookings and schedules.</p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center bg-brand-bg p-1 rounded-xl mr-2">
+                        <button
+                            onClick={() => setViewMode("table")}
+                            className={cn("p-2 rounded-lg transition-all", viewMode === "table" ? "bg-white text-primary shadow-sm" : "text-brand-muted")}
+                        >
+                            <LayoutList className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode("calendar")}
+                            className={cn("p-2 rounded-lg transition-all", viewMode === "calendar" ? "bg-white text-primary shadow-sm" : "text-brand-muted")}
+                        >
+                            <Grid className="w-4 h-4" />
+                        </button>
+                    </div>
                     <button className="btn-secondary flex-1 sm:flex-none py-2 px-3 text-xs sm:text-sm whitespace-nowrap">
                         <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         Export
@@ -173,157 +213,276 @@ const AppointmentsPage = () => {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted shrink-0" />
                             <input
                                 type="text"
-                                placeholder="Search..."
+                                placeholder="Search patient, doctor, or ID..."
                                 className="input-base pl-9 h-10 text-sm w-full"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="flex items-center shrink-0">
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                className={cn("btn-secondary h-10 px-3 flex items-center gap-2 text-sm", isFilterOpen && "bg-primary/5 text-primary border-primary/20")}
+                            >
+                                <Filter className="w-4 h-4 shrink-0" />
+                                <span className="hidden sm:inline">Filters</span>
+                                {Object.values(filters).filter(v => v !== 'All').length > 0 && (
+                                    <span className="w-5 h-5 bg-primary text-white rounded-full text-[10px] flex items-center justify-center">
+                                        {Object.values(filters).filter(v => v !== 'All').length}
+                                    </span>
+                                )}
+                            </button>
                             <button className="btn-secondary h-10 px-3 flex items-center gap-2 text-sm max-w-[120px] sm:max-w-none">
                                 <Calendar className="w-4 h-4 shrink-0" />
                                 <span className="hidden sm:inline truncate">Date Range</span>
                             </button>
                         </div>
                     </div>
+
+                    {isFilterOpen && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-brand-bg rounded-xl border border-brand-border animate-in slide-in-from-top-2">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-brand-muted uppercase">Doctor</label>
+                                <select
+                                    className="input-base h-9 text-xs"
+                                    value={filters.doctor}
+                                    onChange={(e) => setFilters({ ...filters, doctor: e.target.value })}
+                                >
+                                    <option>All</option>
+                                    <option>Dr. Robert Smith</option>
+                                    <option>Dr. Lisa Wong</option>
+                                    <option>Dr. Sarah Miller</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-brand-muted uppercase">Specialty</label>
+                                <select
+                                    className="input-base h-9 text-xs"
+                                    value={filters.specialty}
+                                    onChange={(e) => setFilters({ ...filters, specialty: e.target.value })}
+                                >
+                                    <option>All</option>
+                                    <option>Cardiology</option>
+                                    <option>Dermatology</option>
+                                    <option>Pediatrics</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-brand-muted uppercase">Mode</label>
+                                <select
+                                    className="input-base h-9 text-xs"
+                                    value={filters.mode}
+                                    onChange={(e) => setFilters({ ...filters, mode: e.target.value })}
+                                >
+                                    <option>All</option>
+                                    <option>In-Person</option>
+                                    <option>Video</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-brand-muted uppercase">Payment</label>
+                                <select
+                                    className="input-base h-9 text-xs"
+                                    value={filters.payment}
+                                    onChange={(e) => setFilters({ ...filters, payment: e.target.value })}
+                                >
+                                    <option>All</option>
+                                    <option>Paid</option>
+                                    <option>Unpaid</option>
+                                    <option>Refunded</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                {/* Table */}
-                <DataTable
-                    headers={[
-                        <input
-                            type="checkbox"
-                            className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
-                            onChange={toggleSelectAll}
-                            checked={selectedIds.length === filteredAppointments.length && filteredAppointments.length > 0}
-                        />,
-                        "Ref ID",
-                        "Patient",
-                        "Doctor",
-                        "Schedule",
-                        "Type",
-                        "Status",
-                        { content: "Action", className: "text-right" }
-                    ]}
-                    mobileContent={filteredAppointments.length > 0 ? filteredAppointments.map((apt, idx) => (
-                        <div key={idx} className="bg-white p-4 rounded-xl border border-brand-border shadow-soft flex flex-col gap-3 relative">
-                            <div className="flex items-center justify-between pb-3 border-b border-brand-border">
-                                <div className="flex items-center gap-2">
+                {/* Table / Calendar View */}
+                {viewMode === "table" ? (
+                    <div className="flex h-full min-h-[600px] overflow-hidden">
+                        <div className={cn("flex-1 transition-all duration-300 overflow-y-auto", isSplitView ? "hidden xl:block" : "block")}>
+                            <DataTable
+                                headers={[
                                     <input
                                         type="checkbox"
                                         className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
-                                        checked={selectedIds.includes(apt.id)}
-                                        onChange={() => toggleSelect(apt.id)}
-                                    />
-                                    <span className="font-bold text-navy text-sm">{apt.id}</span>
-                                </div>
-                                <StatusBadge status={apt.status} />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Patient</span>
-                                    <span className="text-sm font-semibold text-charcoal">{apt.patient}</span>
-                                    <span className="text-[10px] text-brand-muted truncate block">{apt.email}</span>
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Doctor</span>
-                                    <span className="text-sm font-semibold text-charcoal">{apt.doctor}</span>
-                                    <span className="text-[10px] text-brand-muted truncate block">{apt.specialty}</span>
-                                </div>
-                            </div>
-                            <div className="flex flex-col gap-1 mt-1">
-                                <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Schedule</span>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1.5 text-navy font-medium text-sm">
-                                        <Calendar className="w-4 h-4 text-brand-muted" /> {formatDate(apt.date)} at {apt.time}
+                                        onChange={toggleSelectAll}
+                                        checked={selectedIds.length === filteredAppointments.length && filteredAppointments.length > 0}
+                                    />,
+                                    "Ref ID",
+                                    "Patient",
+                                    "Doctor",
+                                    "Schedule",
+                                    "Type",
+                                    "Status",
+                                    { content: "Action", className: "text-right" }
+                                ]}
+                                mobileContent={filteredAppointments.length > 0 ? filteredAppointments.map((apt, idx) => (
+                                    <div key={idx} className="bg-white p-4 rounded-xl border border-brand-border shadow-soft flex flex-col gap-3 relative">
+                                        <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                                                    checked={selectedIds.includes(apt.id)}
+                                                    onChange={() => toggleSelect(apt.id)}
+                                                />
+                                                <span className="font-bold text-navy text-sm">{apt.id}</span>
+                                            </div>
+                                            <StatusBadge status={apt.status} />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Patient</span>
+                                                <span className="text-sm font-semibold text-charcoal">{apt.patient}</span>
+                                                <span className="text-[10px] text-brand-muted truncate block">{apt.email}</span>
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Doctor</span>
+                                                <span className="text-sm font-semibold text-charcoal">{apt.doctor}</span>
+                                                <span className="text-[10px] text-brand-muted truncate block">{apt.specialty}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col gap-1 mt-1">
+                                            <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Schedule</span>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-1.5 text-navy font-medium text-sm">
+                                                    <Calendar className="w-4 h-4 text-brand-muted" /> {formatDate(apt.date)} at {apt.time}
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className={cn("px-2 py-1 rounded text-[10px] font-bold", apt.type === 'First Visit' ? 'bg-blue-50 text-primary' : 'bg-brand-bg text-charcoal')}>{apt.type}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="pt-3 border-t border-brand-border mt-1">
+                                            <button className="w-full btn-secondary text-xs sm:text-sm py-2" onClick={() => openDetails(apt)}>View Details</button>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className={cn("px-2 py-1 rounded text-[10px] font-bold", apt.type === 'First Visit' ? 'bg-blue-50 text-primary' : 'bg-brand-bg text-charcoal')}>{apt.type}</span>
+                                )) : (
+                                    <div className="p-8 text-center text-brand-muted">
+                                        <p className="font-bold text-navy text-base">No appointments found</p>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="pt-3 border-t border-brand-border mt-1">
-                                <button className="w-full btn-secondary text-xs sm:text-sm py-2" onClick={() => openDetails(apt)}>View Details</button>
-                            </div>
+                                )}
+                            >
+                                {filteredAppointments.length > 0 ? filteredAppointments.map((apt, idx) => (
+                                    <tr key={idx} className={cn("hover:bg-brand-bg/30 transition-colors group cursor-pointer", selectedIds.includes(apt.id) || activeApt?.id === apt.id ? "bg-primary/5 hover:bg-primary/10" : "")} onClick={(e) => {
+                                        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                                            openDetails(apt);
+                                        }
+                                    }}>
+                                        <td onClick={(e) => e.stopPropagation()}>
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                                                checked={selectedIds.includes(apt.id)}
+                                                onChange={() => toggleSelect(apt.id)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <span className="text-sm font-bold text-navy hover:underline">{apt.id}</span>
+                                            <p className="text-[10px] text-brand-muted">via {apt.source}</p>
+                                        </td>
+                                        <td>
+                                            <div className="flex flex-col min-w-[120px]">
+                                                <span className="text-[13px] font-semibold text-navy">{apt.patient}</span>
+                                                <span className="text-[11px] text-brand-muted">{apt.email}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="flex flex-col min-w-[120px]">
+                                                <span className="text-[13px] text-charcoal font-medium">{apt.doctor}</span>
+                                                <span className="text-[11px] text-brand-muted">{apt.specialty}</span>
+                                            </div>
+                                        </td>
+                                        <td className="whitespace-nowrap">
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center gap-1.5 text-[13px] text-charcoal font-medium">
+                                                    <Calendar className="w-3.5 h-3.5 text-brand-muted" />
+                                                    {formatDate(apt.date)}
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-[11px] text-brand-muted mt-0.5">
+                                                    <Clock className="w-3.5 h-3.5 text-primary/60" />
+                                                    {apt.time}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className={cn(
+                                                "inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border whitespace-nowrap",
+                                                apt.mode === "Video" ? "bg-purple-50 text-purple-700 border-purple-100" : "bg-blue-50 text-blue-700 border-blue-100"
+                                            )}>
+                                                {apt.mode === "Video" ? <Video className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
+                                                {apt.mode}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <StatusBadge status={apt.status} />
+                                        </td>
+                                        <td className="text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary" onClick={() => openDetails(apt)}>
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                                <div className="relative group/more">
+                                                    <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy">
+                                                        <MoreHorizontal className="w-4 h-4" />
+                                                    </button>
+                                                    <div className="absolute right-0 top-full mt-1 hidden group-hover/more:block z-50 bg-white border border-brand-border rounded-xl shadow-premium p-1 min-w-[140px] text-left">
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); alert('Reschedule'); }}
+                                                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-navy hover:bg-brand-bg rounded-lg"
+                                                        >
+                                                            <RefreshCw className="w-3.5 h-3.5" /> Reschedule
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleUpdateStatus(apt.id, 'Cancelled'); }}
+                                                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" /> Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="8" className="px-6 py-12 text-center text-brand-muted">
+                                            <div className="flex flex-col items-center justify-center">
+                                                <Calendar className="w-10 h-10 text-brand-border mb-3" />
+                                                <p className="font-bold text-navy text-base">No appointments found</p>
+                                                <p className="text-xs">Try adjusting your filters or search query.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </DataTable>
                         </div>
-                    )) : (
-                        <div className="p-8 text-center text-brand-muted">
-                            <p className="font-bold text-navy text-base">No appointments found</p>
-                        </div>
-                    )}
-                >
-                    {filteredAppointments.length > 0 ? filteredAppointments.map((apt, idx) => (
-                        <tr key={idx} className={cn("hover:bg-brand-bg/30 transition-colors group cursor-pointer", selectedIds.includes(apt.id) ? "bg-primary/5 hover:bg-primary/10" : "")} onClick={(e) => {
-                            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
-                                openDetails(apt);
-                            }
-                        }}>
-                            <td onClick={(e) => e.stopPropagation()}>
-                                <input
-                                    type="checkbox"
-                                    className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
-                                    checked={selectedIds.includes(apt.id)}
-                                    onChange={() => toggleSelect(apt.id)}
+
+                        {/* Side Panel for Split View */}
+                        {isSplitView && activeApt && (
+                            <div className="w-[450px] shrink-0 border-l border-brand-border">
+                                <AppointmentDetailPanel
+                                    appointment={activeApt}
+                                    onClose={() => setIsSplitView(false)}
+                                    onUpdateStatus={handleUpdateStatus}
                                 />
-                            </td>
-                            <td>
-                                <span className="text-sm font-bold text-navy hover:underline">{apt.id}</span>
-                                <p className="text-[10px] text-brand-muted">via {apt.source}</p>
-                            </td>
-                            <td>
-                                <div className="flex flex-col min-w-[120px]">
-                                    <span className="text-[13px] font-semibold text-navy">{apt.patient}</span>
-                                    <span className="text-[11px] text-brand-muted">{apt.email}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <div className="flex flex-col min-w-[120px]">
-                                    <span className="text-[13px] text-charcoal font-medium">{apt.doctor}</span>
-                                    <span className="text-[11px] text-brand-muted">{apt.specialty}</span>
-                                </div>
-                            </td>
-                            <td className="whitespace-nowrap">
-                                <div className="flex flex-col">
-                                    <div className="flex items-center gap-1.5 text-[13px] text-charcoal font-medium">
-                                        <Calendar className="w-3.5 h-3.5 text-brand-muted" />
-                                        {formatDate(apt.date)}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-[11px] text-brand-muted mt-0.5">
-                                        <Clock className="w-3.5 h-3.5 text-primary/60" />
-                                        {apt.time}
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div className={cn(
-                                    "inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border whitespace-nowrap",
-                                    apt.mode === "Video" ? "bg-purple-50 text-purple-700 border-purple-100" : "bg-blue-50 text-blue-700 border-blue-100"
-                                )}>
-                                    {apt.mode === "Video" ? <Video className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
-                                    {apt.mode}
-                                </div>
-                            </td>
-                            <td>
-                                <StatusBadge status={apt.status} />
-                            </td>
-                            <td className="text-right">
-                                <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary" onClick={() => openDetails(apt)}>
-                                    <Eye className="w-4 h-4" />
-                                </button>
-                            </td>
-                        </tr>
-                    )) : (
-                        <tr>
-                            <td colSpan="8" className="px-6 py-12 text-center text-brand-muted">
-                                <div className="flex flex-col items-center justify-center">
-                                    <Calendar className="w-10 h-10 text-brand-border mb-3" />
-                                    <p className="font-bold text-navy text-base">No appointments found</p>
-                                    <p className="text-xs">Try adjusting your filters or search query.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    )}
-                </DataTable>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="p-12 text-center">
+                        <div className="max-w-md mx-auto space-y-4">
+                            <div className="w-20 h-20 bg-blue-50 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Grid className="w-10 h-10" />
+                            </div>
+                            <h3 className="text-xl font-bold text-navy">Calendar View Under Development</h3>
+                            <p className="text-brand-muted text-sm leading-relaxed">
+                                We are integrating a full drag-and-drop calendar for easier doctor scheduling. For now, use the table view for management.
+                            </p>
+                            <button onClick={() => setViewMode("table")} className="btn-primary px-8">Back to Table</button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Bulk Action Bar */}
                 {selectedIds.length > 0 && (

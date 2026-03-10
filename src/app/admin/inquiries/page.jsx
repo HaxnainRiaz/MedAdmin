@@ -33,6 +33,8 @@ const InquiriesPage = () => {
     const [inquiries, setInquiries] = useState(initialInquiries);
     const [searchQuery, setSearchQuery] = useState("");
     const [priorityFilter, setPriorityFilter] = useState("All");
+    const [statusFilter, setStatusFilter] = useState("All");
+    const [selectedIds, setSelectedIds] = useState([]);
 
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [activeInq, setActiveInq] = useState(null);
@@ -40,19 +42,54 @@ const InquiriesPage = () => {
 
     const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-    // Filtering
-    const filteredInquiries = inquiries.filter(inq => {
-        const matchesPriority = priorityFilter === "All" || inq.priority === priorityFilter;
-        const matchesSearch = inq.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            inq.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            inq.subject.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesPriority && matchesSearch;
-    });
-
     const triggerToast = () => {
         setShowSuccessToast(true);
         setTimeout(() => setShowSuccessToast(false), 3000);
     };
+
+    // Selection Handlers
+    const toggleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedIds(filteredInquiries.map(i => i.id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const toggleSelect = (id) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(selId => selId !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    // Bulk Actions
+    const handleBulkDelete = () => {
+        if (confirm(`Are you sure you want to delete ${selectedIds.length} inquiries?`)) {
+            setInquiries(inquiries.filter(i => !selectedIds.includes(i.id)));
+            setSelectedIds([]);
+            triggerToast();
+        }
+    };
+
+    const handleBulkStatusChange = (newStatus) => {
+        setInquiries(inquiries.map(i =>
+            selectedIds.includes(i.id) ? { ...i, status: newStatus } : i
+        ));
+        setSelectedIds([]);
+        triggerToast();
+    };
+
+    // Filtering
+    const filteredInquiries = inquiries.filter(inq => {
+        const matchesPriority = priorityFilter === "All" || inq.priority === priorityFilter;
+        const matchesStatus = statusFilter === "All" || inq.status === statusFilter;
+        const matchesSearch = inq.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            inq.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            inq.subject.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesPriority && matchesSearch && matchesStatus;
+    });
 
     const handleAssign = (id, newOwner) => {
         setInquiries(inquiries.map(i => i.id === id ? { ...i, owner: newOwner, status: i.status === "Open" ? "In Progress" : i.status } : i));
@@ -76,6 +113,8 @@ const InquiriesPage = () => {
 
         handleStatusChange(activeInq.id, "Resolved");
         setReplyText("");
+        setIsDetailModalOpen(false);
+        triggerToast();
     };
 
     const openDetails = (inq) => {
@@ -88,8 +127,8 @@ const InquiriesPage = () => {
         <div className="space-y-6 relative">
             {/* Success Toast */}
             {showSuccessToast && (
-                <div className="fixed top-24 right-8 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-premium flex items-center gap-3 z-50 animate-in fade-in slide-in-from-top-4">
-                    <CheckCircle2 className="w-5 h-5" />
+                <div className="fixed top-24 right-8 bg-navy text-white px-6 py-3 rounded-xl shadow-premium flex items-center gap-3 z-50 animate-in fade-in slide-in-from-top-4 border border-white/10">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     <span className="font-bold text-sm">Action completed successfully!</span>
                 </div>
             )}
@@ -98,18 +137,35 @@ const InquiriesPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-xl sm:text-2xl font-bold text-navy">Inquiries Inbox</h2>
-                    <p className="text-brand-muted text-xs sm:text-sm">Manage submissions and inquiries.</p>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage submissions, support tickets and inquiries.</p>
                 </div>
                 <div className="flex items-center gap-3 self-end sm:self-auto">
-                    <div className="flex -space-x-2">
+                    <div className="flex -space-x-2 mr-2">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-bg border-2 border-white flex items-center justify-center">
-                                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-muted" />
+                            <div key={i} className="w-8 h-8 rounded-full bg-brand-bg border-2 border-white flex items-center justify-center overflow-hidden">
+                                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">
+                                    {String.fromCharCode(64 + i)}
+                                </div>
                             </div>
                         ))}
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white border-2 border-white flex items-center justify-center text-[9px] sm:text-[10px] font-bold">+{inquiries.length}</div>
+                        <div className="w-8 h-8 rounded-full bg-navy text-white border-2 border-white flex items-center justify-center text-[10px] font-bold">+{inquiries.length}</div>
                     </div>
                 </div>
+            </div>
+
+            {/* KPI Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                {[
+                    { label: "Total Inquiries", value: inquiries.length, color: "blue" },
+                    { label: "High Priority", value: inquiries.filter(i => i.priority === 'High').length, color: "red" },
+                    { label: "Waiting Action", value: inquiries.filter(i => i.status === 'Open').length, color: "orange" },
+                    { label: "Resolved Today", value: inquiries.filter(i => i.status === 'Resolved').length, color: "green" }
+                ].map((stat, idx) => (
+                    <div key={idx} className="admin-card p-3 sm:p-4 flex flex-col">
+                        <span className="text-[10px] sm:text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1 truncate">{stat.label}</span>
+                        <span className="text-lg sm:text-xl font-bold text-navy">{stat.value}</span>
+                    </div>
+                ))}
             </div>
 
             <div className="admin-card overflow-hidden">
@@ -118,25 +174,34 @@ const InquiriesPage = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
                         <input
                             type="text"
-                            placeholder="Search sender, subject..."
+                            placeholder="Search sender, subject, message..."
                             className="input-base pl-10 h-10 text-sm"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                     <div className="flex items-center gap-2 w-full lg:w-auto">
-                        <div className="flex-1 lg:w-40">
-                            <select
-                                className="input-base text-xs sm:text-sm h-10"
-                                value={priorityFilter}
-                                onChange={(e) => setPriorityFilter(e.target.value)}
-                            >
-                                <option value="All">All Priorities</option>
-                                <option value="High">High</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Low">Low</option>
-                            </select>
-                        </div>
+                        <select
+                            className="input-base text-xs sm:text-sm h-10 flex-1 lg:w-36"
+                            value={priorityFilter}
+                            onChange={(e) => setPriorityFilter(e.target.value)}
+                        >
+                            <option value="All">All Priorities</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                        <select
+                            className="input-base text-xs sm:text-sm h-10 flex-1 lg:w-36"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="All">All Status</option>
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Waiting">Waiting</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
                         <button className="btn-secondary h-10 px-3 shrink-0">
                             <Filter className="w-4 h-4" />
                         </button>
@@ -145,6 +210,12 @@ const InquiriesPage = () => {
 
                 <DataTable
                     headers={[
+                        <input
+                            type="checkbox"
+                            className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                            onChange={toggleSelectAll}
+                            checked={selectedIds.length === filteredInquiries.length && filteredInquiries.length > 0}
+                        />,
                         "Sender",
                         "Inquiry details",
                         { content: "Priority", className: "hidden sm:table-cell" },
@@ -152,60 +223,17 @@ const InquiriesPage = () => {
                         { content: "Assignee", className: "hidden md:table-cell" },
                         { content: "Actions", className: "text-right" }
                     ]}
-                    mobileContent={filteredInquiries.length > 0 ? filteredInquiries.map((inq, idx) => (
-                        <div key={idx} className="bg-white p-4 rounded-xl border border-brand-border shadow-soft flex flex-col gap-4 relative">
-                            <div className="flex flex-col gap-1 pr-20">
-                                <h3 className="text-sm font-bold text-navy leading-tight">{inq.subject}</h3>
-                                <span className="text-[10px] text-brand-muted font-bold bg-brand-bg px-2 py-0.5 rounded w-fit uppercase tracking-wider mt-1">{inq.type}</span>
-                            </div>
-                            <div className="absolute top-4 right-4">
-                                <StatusBadge status={inq.status} />
-                            </div>
-                            <div className="flex flex-col gap-2 pt-3 border-t border-brand-border">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex flex-col min-w-0 flex-1">
-                                        <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Sender</span>
-                                        <span className="text-sm font-semibold text-charcoal truncate pr-2">{inq.name}</span>
-                                        <span className="text-[10px] text-brand-muted truncate block pr-2">{inq.email}</span>
-                                    </div>
-                                    <div className="flex flex-col items-end shrink-0">
-                                        <span className="text-[10px] uppercase tracking-widest text-brand-muted font-bold">Priority</span>
-                                        <div className={cn(
-                                            "flex items-center gap-1.5 text-xs font-bold",
-                                            inq.priority === "High" ? "text-red-600" :
-                                                inq.priority === "Medium" ? "text-orange-600" : "text-blue-600"
-                                        )}>
-                                            <Flag className="w-3.5 h-3.5 fill-current" />
-                                            {inq.priority}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-between pt-3 mt-1 border-t border-brand-border">
-                                {inq.owner === "Unassigned" ? (
-                                    <button className="text-[10px] font-black text-primary flex items-center gap-1 uppercase tracking-tight" onClick={(e) => { e.stopPropagation(); handleAssign(inq.id, "John Admin") }}>
-                                        <UserCheck className="w-3.5 h-3.5" /> Assign Me
-                                    </button>
-                                ) : (
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-blue-100 text-primary flex items-center justify-center text-[10px] font-bold">
-                                            {inq.owner.charAt(0)}
-                                        </div>
-                                        <span className="text-xs text-charcoal font-medium">{inq.owner}</span>
-                                    </div>
-                                )}
-                                <button className="px-4 py-1.5 btn-secondary text-xs" onClick={() => openDetails(inq)}>Manage</button>
-                            </div>
-                        </div>
-                    )) : (
-                        <div className="p-8 text-center text-brand-muted flex flex-col items-center">
-                            <MessageSquare className="w-10 h-10 text-brand-border mb-3" />
-                            <p className="font-bold text-navy text-base">No inquiries found</p>
-                        </div>
-                    )}
                 >
                     {filteredInquiries.length > 0 ? filteredInquiries.map((inq, idx) => (
-                        <tr key={idx} onClick={() => openDetails(inq)} className="hover:bg-brand-bg/30 transition-colors group cursor-pointer">
+                        <tr key={idx} className={cn("hover:bg-brand-bg/30 transition-colors group cursor-pointer", selectedIds.includes(inq.id) ? "bg-primary/5" : "")} onClick={() => openDetails(inq)}>
+                            <td onClick={(e) => e.stopPropagation()}>
+                                <input
+                                    type="checkbox"
+                                    className="rounded border-brand-border text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                                    checked={selectedIds.includes(inq.id)}
+                                    onChange={() => toggleSelect(inq.id)}
+                                />
+                            </td>
                             <td>
                                 <div className="flex flex-col min-w-[150px]">
                                     <span className="text-sm font-bold text-navy hover:text-primary transition-colors">{inq.name}</span>
@@ -214,12 +242,19 @@ const InquiriesPage = () => {
                             </td>
                             <td>
                                 <div className="flex flex-col min-w-[180px]">
-                                    <span className="text-sm font-medium text-charcoal">{inq.subject}</span>
+                                    <span className="text-sm font-medium text-charcoal truncate max-w-[200px]">{inq.subject}</span>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-[10px] text-brand-muted font-semibold bg-brand-bg px-1.5 py-0.5 rounded w-fit">{inq.type}</span>
-                                        <span className="sm:hidden flex items-center gap-1 text-[10px] font-bold text-red-600">
-                                            <Flag className="w-3 h-3 fill-current" />
-                                        </span>
+                                        <span className="text-[10px] text-brand-muted font-semibold bg-brand-bg px-1.5 py-0.5 rounded w-fit uppercase tracking-tight border border-brand-border/50">{inq.type}</span>
+                                        <div className="sm:hidden">
+                                            <div className={cn(
+                                                "flex items-center gap-1 text-[10px] font-bold",
+                                                inq.priority === "High" ? "text-red-600" :
+                                                    inq.priority === "Medium" ? "text-orange-600" : "text-blue-600"
+                                            )}>
+                                                <Flag className="w-2.5 h-2.5 fill-current" />
+                                                {inq.priority}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -254,12 +289,14 @@ const InquiriesPage = () => {
                                 )}
                             </td>
                             <td className="text-right">
-                                <button className="btn-secondary py-1 px-3 text-[11px] sm:text-xs min-h-[32px]">Manage</button>
+                                <div className="flex items-center justify-end gap-1">
+                                    <button className="btn-secondary py-1 px-3 text-[11px] sm:text-xs min-h-[32px]">Manage</button>
+                                </div>
                             </td>
                         </tr>
                     )) : (
                         <tr>
-                            <td colSpan="6" className="px-6 py-12 text-center text-brand-muted">
+                            <td colSpan="7" className="px-6 py-12 text-center text-brand-muted">
                                 <div className="flex flex-col items-center justify-center">
                                     <MessageSquare className="w-10 h-10 text-brand-border mb-3" />
                                     <p className="font-bold text-navy text-base">No inquiries found</p>
@@ -268,6 +305,21 @@ const InquiriesPage = () => {
                         </tr>
                     )}
                 </DataTable>
+
+                {/* Bulk Action Bar */}
+                {selectedIds.length > 0 && (
+                    <div className="p-3 sm:p-4 bg-navy text-white flex flex-col sm:flex-row items-center justify-between gap-3 animate-in slide-in-from-bottom-2">
+                        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                            <span className="text-xs sm:text-sm font-medium whitespace-nowrap">{selectedIds.length} inquiries selected</span>
+                            <div className="flex items-center gap-2 flex-1">
+                                <button className="flex-1 sm:flex-none px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-[11px] font-bold transition-colors" onClick={() => handleBulkStatusChange('Resolved')}>Mark Resolved</button>
+                                <button className="flex-1 sm:flex-none px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[11px] font-bold transition-colors" onClick={() => handleBulkStatusChange('In Progress')}>In Progress</button>
+                                <button className="flex-1 sm:flex-none px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-[11px] font-bold transition-colors" onClick={handleBulkDelete}>Delete</button>
+                            </div>
+                        </div>
+                        <button className="text-[11px] text-white/60 hover:text-white transition-colors underline" onClick={() => setSelectedIds([])}>Clear selection</button>
+                    </div>
+                )}
 
                 <div className="p-3 sm:p-4 bg-brand-bg/30 border-t border-brand-border flex items-center justify-between">
                     <span className="text-[10px] sm:text-xs text-brand-muted font-medium italic">Showing {filteredInquiries.length} of {inquiries.length} inquiries</span>
