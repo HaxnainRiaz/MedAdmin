@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     CircleHelp,
     Search,
@@ -138,63 +139,58 @@ const FaqPage = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Question</th>
-                                <th className="px-6 py-4">Category</th>
-                                <th className="px-6 py-4">Status & Reach</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredFaqs.length > 0 ? filteredFaqs.map((faq, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 shrink-0 group-hover:bg-primary group-hover:text-white transition-colors mt-0.5">
-                                                <CircleHelp className="w-4 h-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-navy hover:text-primary cursor-pointer transition-colors" onClick={() => openEditModal(faq)}>{faq.question}</p>
-                                                <p className="text-xs text-charcoal mt-1 line-clamp-1 max-w-[400px]">{faq.answer}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-white border border-brand-border rounded-lg text-[10px] font-bold text-brand-muted">
-                                            {faq.category}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="flex flex-col gap-1.5">
-                                            <StatusBadge status={faq.status} />
-                                            <span className="text-[10px] font-black tracking-widest uppercase text-brand-muted">{faq.views} views</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right align-top">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary" onClick={() => openEditModal(faq)}>
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500" onClick={() => handleDelete(faq.id)}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="4" className="px-6 py-12 text-center text-brand-muted">
-                                        <CircleHelp className="w-12 h-12 text-brand-border mx-auto mb-3" />
-                                        <p className="font-bold text-navy text-lg">No FAQs found</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    headers={[
+                        "Question",
+                        "Category",
+                        "Status & Reach",
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {filteredFaqs.length > 0 ? filteredFaqs.map((faq, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td>
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 shrink-0 group-hover:bg-primary group-hover:text-white transition-colors mt-0.5">
+                                        <CircleHelp className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-navy hover:text-primary cursor-pointer transition-colors" onClick={() => openEditModal(faq)}>{faq.question}</p>
+                                        <p className="text-xs text-charcoal mt-1 line-clamp-1 max-w-[400px]">{faq.answer}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td className="align-top">
+                                <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-white border border-brand-border rounded-lg text-[10px] font-bold text-brand-muted">
+                                    {faq.category}
+                                </div>
+                            </td>
+                            <td className="align-top">
+                                <div className="flex flex-col gap-1.5">
+                                    <StatusBadge status={faq.status} />
+                                    <span className="text-[10px] font-black tracking-widest uppercase text-brand-muted">{faq.views} views</span>
+                                </div>
+                            </td>
+                            <td className="text-right align-top">
+                                <div className="flex items-center justify-end gap-2">
+                                    <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary" onClick={() => openEditModal(faq)}>
+                                        <Edit2 className="w-4 h-4" />
+                                    </button>
+                                    <button className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500" onClick={() => handleDelete(faq.id)}>
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="4" className="px-6 py-12 text-center text-brand-muted">
+                                <CircleHelp className="w-12 h-12 text-brand-border mx-auto mb-3" />
+                                <p className="font-bold text-navy text-lg">No FAQs found</p>
+                            </td>
+                        </tr>
+                    )}
+                </DataTable>
             </div>
 
             {/* Create/Edit FAQ Modal */}

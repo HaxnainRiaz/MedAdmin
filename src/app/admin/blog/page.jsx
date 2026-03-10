@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     Search,
     Plus,
@@ -133,85 +134,80 @@ const BlogPage = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Article</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Author</th>
-                                <th className="px-6 py-4">Category</th>
-                                <th className="px-6 py-4">Stats</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {posts.map((post, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4 max-w-xs">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-navy group-hover:text-primary transition-colors cursor-pointer leading-tight">{post.title}</span>
-                                            <div className="flex items-center gap-3 mt-1.5">
-                                                <div className="flex items-center gap-1 text-[10px] text-brand-muted">
-                                                    <Calendar className="w-3 h-3" />
-                                                    {post.date}
-                                                </div>
-                                            </div>
+                <DataTable
+                    headers={[
+                        "Article",
+                        "Status",
+                        "Author",
+                        "Category",
+                        "Stats",
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {posts.map((post, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-navy group-hover:text-primary transition-colors cursor-pointer leading-tight">{post.title}</span>
+                                    <div className="flex items-center gap-3 mt-1.5">
+                                        <div className="flex items-center gap-1 text-[10px] text-brand-muted">
+                                            <Calendar className="w-3 h-3" />
+                                            {post.date}
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={post.status} />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 bg-brand-bg rounded-full flex items-center justify-center border border-brand-border font-bold text-[10px] text-primary">
-                                                {post.author.charAt(0)}
-                                            </div>
-                                            <span className="text-xs text-charcoal font-medium">{post.author}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-lg border border-blue-100">{post.category}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-4 text-brand-muted text-[10px] font-bold uppercase">
-                                            <div className="flex items-center gap-1">
-                                                <Eye className="w-3 h-3" />
-                                                {post.views}
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <MessageCircle className="w-3 h-3" />
-                                                {post.comments}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <button
-                                                className="p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy"
-                                                onClick={() => openEditModal(post)}
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                className="p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-blue-600"
-                                                onClick={() => triggerToast(`Viewing live preview of ${post.title}`, "info")}
-                                            >
-                                                <ExternalLink className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500"
-                                                onClick={() => handleDelete(post.id)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <StatusBadge status={post.status} />
+                            </td>
+                            <td>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 bg-brand-bg rounded-full flex items-center justify-center border border-brand-border font-bold text-[10px] text-primary">
+                                        {post.author.charAt(0)}
+                                    </div>
+                                    <span className="text-xs text-charcoal font-medium">{post.author}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-lg border border-blue-100">{post.category}</span>
+                            </td>
+                            <td>
+                                <div className="flex items-center gap-4 text-brand-muted text-[10px] font-bold uppercase">
+                                    <div className="flex items-center gap-1">
+                                        <Eye className="w-3 h-3" />
+                                        {post.views}
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <MessageCircle className="w-3 h-3" />
+                                        {post.comments}
+                                    </div>
+                                </div>
+                            </td>
+                            <td className="text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                    <button
+                                        className="p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy"
+                                        onClick={() => openEditModal(post)}
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        className="p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-blue-600"
+                                        onClick={() => triggerToast(`Viewing live preview of ${post.title}`, "info")}
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500"
+                                        onClick={() => handleDelete(post.id)}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </DataTable>
             </div>
 
             {/* Create / Edit Modal */}

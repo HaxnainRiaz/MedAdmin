@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     Search,
     Filter,
@@ -109,41 +110,41 @@ const DoctorsPage = () => {
             )}
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">Doctors</h2>
-                    <p className="text-brand-muted text-sm">Manage medical staff profiles, schedules, and website visibility.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">Doctors</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage medical staff profiles and visibility.</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button className="btn-secondary">Download Directory</button>
-                    <button className="btn-primary" onClick={openCreateModal}>
-                        <Plus className="w-4 h-4" />
-                        Add New Doctor
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <button className="btn-secondary flex-1 sm:flex-none py-2 px-3 text-xs sm:text-sm">Download</button>
+                    <button className="btn-primary flex-1 sm:flex-none py-2 px-3 text-xs sm:text-sm" onClick={openCreateModal}>
+                        <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="whitespace-nowrap">Add Doctor</span>
                     </button>
                 </div>
             </div>
 
             {/* Filters & Controls */}
-            <div className="admin-card p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="admin-card p-3 sm:p-4 flex flex-col lg:flex-row gap-3 sm:gap-4 items-center justify-between">
                 <div className="relative flex-1 w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
                     <input
                         type="text"
-                        placeholder="Search by doctor name, specialty, or ID..."
-                        className="input-base pl-10"
+                        placeholder="Search doctors..."
+                        className="input-base pl-10 h-10 text-sm"
                         value={searchQuery}
                         onChange={handleSearch}
                     />
                 </div>
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                    <select className="input-base text-sm py-1.5 min-w-[140px]">
+                <div className="flex items-center gap-2 w-full lg:w-auto">
+                    <select className="input-base text-sm py-1.5 h-10 min-w-[120px] sm:min-w-[160px] flex-1">
                         <option>All Specialties</option>
                         <option>Cardiology</option>
                         <option>Dermatology</option>
                         <option>Pediatrics</option>
                         <option>Neurology</option>
                     </select>
-                    <button className="btn-secondary h-10 px-3">
+                    <button className="btn-secondary h-10 px-3 shrink-0">
                         <Filter className="w-4 h-4" />
                     </button>
                 </div>
@@ -151,87 +152,83 @@ const DoctorsPage = () => {
 
             {/* Table View */}
             <div className="admin-card overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Doctor</th>
-                                <th className="px-6 py-4">Specialty</th>
-                                <th className="px-6 py-4">Experience</th>
-                                <th className="px-6 py-4">Rating</th>
-                                <th className="px-6 py-4">Modes</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredDoctors.length > 0 ? filteredDoctors.map((doc, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200 shrink-0">
-                                                <Stethoscope className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-sm font-bold text-navy">{doc.name}</span>
-                                                    {doc.featured && (
-                                                        <span className="bg-yellow-100 text-yellow-700 text-[8px] font-black uppercase px-1.5 py-0.5 rounded cursor-help">Featured</span>
-                                                    )}
-                                                </div>
-                                                <span className="text-xs text-brand-muted">{doc.title}</span>
-                                            </div>
+                <DataTable
+                    headers={[
+                        "Doctor",
+                        "Specialty",
+                        { content: "Exp", className: "text-center" },
+                        "Rating",
+                        { content: "Modes", className: "hidden md:table-cell" },
+                        "Status",
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {filteredDoctors.length > 0 ? filteredDoctors.map((doc, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td className="min-w-[180px]">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 rounded-xl flex items-center justify-center border border-blue-200 shrink-0">
+                                        <Stethoscope className="w-5 h-5 text-primary" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0 flex-1">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            <span className="text-sm font-bold text-navy">{doc.name}</span>
+                                            {doc.featured && (
+                                                <span className="bg-yellow-100 text-yellow-700 text-[8px] font-black uppercase px-1.5 py-0.5 rounded shrink-0">Featured</span>
+                                            )}
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4 capitalize text-sm text-charcoal">{doc.specialty}</td>
-                                    <td className="px-6 py-4 text-sm text-charcoal text-center">
-                                        <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-brand-bg rounded-lg font-medium">
-                                            <Briefcase className="w-3.5 h-3.5 text-brand-muted" />
-                                            {doc.experience} Yrs
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1 text-sm font-bold text-navy">
-                                            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                                            {doc.rating}
-                                            <span className="text-[10px] text-brand-muted font-normal ml-1">({doc.reviews})</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-charcoal">
-                                        <div className="flex flex-wrap gap-1">
-                                            {doc.modes.map((m, i) => (
-                                                <span key={i} className="px-1.5 py-0.5 bg-brand-bg rounded text-[10px] font-semibold">{m}</span>
-                                            ))}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={doc.status} />
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 outline-none">
-                                            <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy" onClick={() => openEditModal(doc)} title="Edit Doctor">
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500" onClick={() => handleDelete(doc.id)} title="Delete Doctor">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="7" className="px-6 py-12 text-center text-brand-muted">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <Stethoscope className="w-12 h-12 text-brand-border mb-3" />
-                                            <p className="font-bold text-navy text-lg">No doctors found</p>
-                                            <p className="text-sm">We couldn't find any doctors matching "{searchQuery}"</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        <span className="text-[11px] text-brand-muted line-clamp-2 leading-tight mt-0.5">{doc.title}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td className="capitalize text-charcoal whitespace-nowrap">
+                                <span className="text-[13px]">{doc.specialty}</span>
+                            </td>
+                            <td className="text-center">
+                                <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-brand-bg rounded-lg text-[11px] font-semibold whitespace-nowrap">
+                                    {doc.experience}Yrs
+                                </div>
+                            </td>
+                            <td>
+                                <div className="flex items-center gap-1 text-[13px] font-bold text-navy whitespace-nowrap">
+                                    <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                    {doc.rating}
+                                    <span className="text-[10px] text-brand-muted font-normal">({doc.reviews})</span>
+                                </div>
+                            </td>
+                            <td className="hidden md:table-cell">
+                                <div className="flex flex-wrap gap-1 max-w-[120px]">
+                                    {doc.modes.map((m, i) => (
+                                        <span key={i} className="px-1.5 py-0.5 bg-brand-bg rounded text-[10px] font-semibold text-charcoal/80">{m}</span>
+                                    ))}
+                                </div>
+                            </td>
+                            <td>
+                                <StatusBadge status={doc.status} />
+                            </td>
+                            <td className="text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                    <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy" onClick={() => openEditModal(doc)} title="Edit Doctor">
+                                        <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                    <button className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500" onClick={() => handleDelete(doc.id)} title="Delete Doctor">
+                                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="7" className="px-6 py-12 text-center text-brand-muted">
+                                <div className="flex flex-col items-center justify-center">
+                                    <Stethoscope className="w-10 h-10 text-brand-border mb-3" />
+                                    <p className="font-bold text-navy text-base">No doctors found</p>
+                                    <p className="text-xs">We couldn't find any matching profiles.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                </DataTable>
             </div>
 
             {/* Create/Edit Doctor Modal */}

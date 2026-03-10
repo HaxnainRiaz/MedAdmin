@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import { mockServices } from "@/lib/admin-data";
 import {
     Plus,
@@ -100,107 +101,112 @@ const ServicesPage = () => {
                 </div>
             )}
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">Service Catalog</h2>
-                    <p className="text-brand-muted text-sm">Manage medical procedures, pricing, and booking settings.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">Service Catalog</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage medical procedures and pricing.</p>
                 </div>
-                <button className="btn-primary" onClick={openCreateModal}>
-                    <Plus className="w-4 h-4" />
+                <button className="btn-primary flex-1 sm:flex-none py-2 px-3 text-xs sm:text-sm whitespace-nowrap" onClick={openCreateModal}>
+                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Create Service
                 </button>
             </div>
 
             <div className="admin-card overflow-hidden">
-                <div className="p-4 border-b border-brand-border flex flex-wrap items-center justify-between gap-4">
-                    <div className="relative flex-1 min-w-[300px]">
+                <div className="p-3 sm:p-4 border-b border-brand-border flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
+                    <div className="relative flex-1 w-full lg:min-w-[400px]">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
                         <input
                             type="text"
                             placeholder="Search services..."
-                            className="input-base pl-10"
+                            className="input-base pl-10 h-10 text-sm"
                             value={searchQuery}
                             onChange={handleSearch}
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <select
-                            className="input-base text-sm w-40"
-                            value={categoryFilter}
-                            onChange={(e) => setCategoryFilter(e.target.value)}
-                        >
-                            {categories.map((cat, idx) => (
-                                <option key={idx} value={cat}>{cat}</option>
-                            ))}
-                        </select>
+                    <div className="flex items-center gap-2 w-full lg:w-auto">
+                        <div className="flex-1 lg:w-48">
+                            <select
+                                className="input-base text-xs sm:text-sm h-10"
+                                value={categoryFilter}
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                            >
+                                {categories.map((cat, idx) => (
+                                    <option key={idx} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <button className="btn-secondary h-10 px-3 shrink-0">
+                            <Filter className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Service Name</th>
-                                <th className="px-6 py-4">Category</th>
-                                <th className="px-6 py-4">Duration</th>
-                                <th className="px-6 py-4">Price Label</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredServices.length > 0 ? filteredServices.map((service, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 bg-brand-bg rounded-xl flex items-center justify-center border border-brand-border shrink-0">
-                                                <BriefcaseMedical className="w-4 h-4 text-primary" />
-                                            </div>
-                                            <span className="text-sm font-bold text-navy">{service.name}</span>
+                <DataTable
+                    headers={[
+                        "Service",
+                        "Category",
+                        { content: "Details", className: "hidden sm:table-cell" },
+                        "Status",
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {filteredServices.length > 0 ? filteredServices.map((service, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td>
+                                <div className="flex items-center gap-3 min-w-[200px]">
+                                    <div className="w-9 h-9 bg-brand-bg rounded-xl flex items-center justify-center border border-brand-border shrink-0">
+                                        <BriefcaseMedical className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-sm font-bold text-navy">{service.name}</span>
+                                        <div className="sm:hidden flex items-center gap-2 mt-0.5">
+                                            <span className="text-[10px] text-charcoal font-bold">{service.price}</span>
+                                            <span className="text-[10px] text-brand-muted">• {service.duration}</span>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-lg border border-blue-100">{service.category}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 text-xs text-charcoal font-medium">
-                                            <Clock className="w-3.5 h-3.5 text-brand-muted" />
-                                            {service.duration}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 text-xs text-navy font-bold">
-                                            <Tag className="w-3.5 h-3.5 text-emerald-500" />
-                                            {service.price}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={service.status} />
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary" onClick={() => openEditModal(service)}>
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500" onClick={() => handleDelete(service.id)}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="6" className="px-6 py-12 text-center text-brand-muted">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <BriefcaseMedical className="w-12 h-12 text-brand-border mb-3" />
-                                            <p className="font-bold text-navy text-lg">No services found</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] sm:text-[11px] font-bold rounded-lg border border-blue-100 whitespace-nowrap">{service.category}</span>
+                            </td>
+                            <td className="hidden sm:table-cell">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-xs text-navy font-bold">
+                                        <Tag className="w-3 h-3 text-emerald-500" />
+                                        {service.price}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-[11px] text-brand-muted">
+                                        <Clock className="w-3 h-3" />
+                                        {service.duration}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <StatusBadge status={service.status} />
+                            </td>
+                            <td className="text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                    <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy" onClick={() => openEditModal(service)}>
+                                        <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                    <button className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500" onClick={() => handleDelete(service.id)}>
+                                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="5" className="px-6 py-12 text-center text-brand-muted">
+                                <div className="flex flex-col items-center justify-center">
+                                    <BriefcaseMedical className="w-10 h-10 text-brand-border mb-3" />
+                                    <p className="font-bold text-navy text-base">No services found</p>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                </DataTable>
             </div>
 
             {/* Create/Edit Modal */}

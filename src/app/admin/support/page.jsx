@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     LifeBuoy,
     Search,
@@ -188,77 +189,72 @@ const SupportTicketsPage = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Ticket details</th>
-                                <th className="px-6 py-4">Priority & Status</th>
-                                <th className="px-6 py-4">Assignee</th>
-                                <th className="px-6 py-4">Last Updated</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredTickets.length > 0 ? filteredTickets.map((ticket, idx) => (
-                                <tr key={idx} onClick={() => openTicket(ticket)} className="hover:bg-brand-bg/30 transition-colors group cursor-pointer">
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-navy hover:text-primary transition-colors">{ticket.subject}</span>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-[10px] text-primary font-black bg-primary/10 px-1.5 py-0.5 rounded">{ticket.id}</span>
-                                                <span className="text-[10px] text-brand-muted flex items-center gap-1">
-                                                    <User className="w-3 h-3 text-brand-muted" />
-                                                    {ticket.user}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-2">
-                                            <StatusBadge status={ticket.status} />
-                                            <div className="flex items-center gap-1.5 px-2 py-0.5 border border-brand-border rounded-md text-[10px] font-bold text-navy inline-flex w-fit bg-white">
-                                                {getPriorityIcon(ticket.priority)}
-                                                {ticket.priority}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`text-xs font-bold ${ticket.assignee === 'Unassigned' ? 'text-red-500 italic px-2 py-1 bg-red-50 rounded-lg' : 'text-charcoal'}`}>
-                                            {ticket.assignee}
+                <DataTable
+                    headers={[
+                        "Ticket details",
+                        "Priority & Status",
+                        "Assignee",
+                        "Last Updated",
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {filteredTickets.length > 0 ? filteredTickets.map((ticket, idx) => (
+                        <tr key={idx} onClick={() => openTicket(ticket)} className="hover:bg-brand-bg/30 transition-colors group cursor-pointer">
+                            <td>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-navy hover:text-primary transition-colors">{ticket.subject}</span>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-[10px] text-primary font-black bg-primary/10 px-1.5 py-0.5 rounded">{ticket.id}</span>
+                                        <span className="text-[10px] text-brand-muted flex items-center gap-1">
+                                            <User className="w-3 h-3 text-brand-muted" />
+                                            {ticket.user}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-medium text-navy flex items-center gap-1">
-                                                <MessageSquare className="w-3 h-3 text-brand-muted" /> {ticket.updated}
-                                            </span>
-                                            <span className="text-[10px] text-brand-muted font-bold tracking-widest uppercase mt-0.5">Opened: {ticket.date}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="btn-secondary px-3 py-1.5 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                                            Analyze <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                                        </button>
-                                        <button className="p-2 ml-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted lg:hidden inline-flex">
-                                            <MoreVertical className="w-4 h-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-brand-muted">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <LifeBuoy className="w-12 h-12 text-brand-border mb-3" />
-                                            <p className="font-bold text-navy text-lg">No tickets found</p>
-                                            <p className="text-sm">We couldn't find any tickets matching your filters.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div className="flex flex-col gap-2">
+                                    <StatusBadge status={ticket.status} />
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 border border-brand-border rounded-md text-[10px] font-bold text-navy inline-flex w-fit bg-white">
+                                        {getPriorityIcon(ticket.priority)}
+                                        {ticket.priority}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span className={`text-xs font-bold ${ticket.assignee === 'Unassigned' ? 'text-red-500 italic px-2 py-1 bg-red-50 rounded-lg' : 'text-charcoal'}`}>
+                                    {ticket.assignee}
+                                </span>
+                            </td>
+                            <td>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-navy flex items-center gap-1">
+                                        <MessageSquare className="w-3 h-3 text-brand-muted" /> {ticket.updated}
+                                    </span>
+                                    <span className="text-[10px] text-brand-muted font-bold tracking-widest uppercase mt-0.5">Opened: {ticket.date}</span>
+                                </div>
+                            </td>
+                            <td className="text-right">
+                                <button className="btn-secondary px-3 py-1.5 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Analyze <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                </button>
+                                <button className="p-2 ml-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted lg:hidden inline-flex">
+                                    <MoreVertical className="w-4 h-4" />
+                                </button>
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="5" className="px-6 py-12 text-center text-brand-muted">
+                                <div className="flex flex-col items-center justify-center">
+                                    <LifeBuoy className="w-12 h-12 text-brand-border mb-3" />
+                                    <p className="font-bold text-navy text-lg">No tickets found</p>
+                                    <p className="text-sm">We couldn't find any tickets matching your filters.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                </DataTable>
             </div>
 
             {/* Ticket Detail Modal */}

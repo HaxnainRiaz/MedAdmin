@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     Search,
     Filter,
@@ -94,146 +95,137 @@ const InquiriesPage = () => {
             )}
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">Inquiries Inbox</h2>
-                    <p className="text-brand-muted text-sm">Manage contact form submissions and general inquiries.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">Inquiries Inbox</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage submissions and inquiries.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 self-end sm:self-auto">
                     <div className="flex -space-x-2">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="w-8 h-8 rounded-full bg-brand-bg border-2 border-white flex items-center justify-center">
-                                <User className="w-4 h-4 text-brand-muted" />
+                            <div key={i} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-bg border-2 border-white flex items-center justify-center">
+                                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-muted" />
                             </div>
                         ))}
-                        <div className="w-8 h-8 rounded-full bg-primary text-white border-2 border-white flex items-center justify-center text-[10px] font-bold">+{inquiries.length}</div>
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white border-2 border-white flex items-center justify-center text-[9px] sm:text-[10px] font-bold">+{inquiries.length}</div>
                     </div>
                 </div>
             </div>
 
-            {/* Main Container */}
             <div className="admin-card overflow-hidden">
-                {/* Filters */}
-                <div className="p-4 border-b border-brand-border flex flex-col md:flex-row gap-4 items-center justify-between">
-                    <div className="relative flex-1 w-full max-w-md">
+                <div className="p-3 sm:p-4 border-b border-brand-border flex flex-col lg:flex-row gap-3 sm:gap-4 items-center justify-between">
+                    <div className="relative flex-1 w-full lg:max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
                         <input
                             type="text"
-                            placeholder="Search sender, subject, or message..."
-                            className="input-base pl-10 h-10"
+                            placeholder="Search sender, subject..."
+                            className="input-base pl-10 h-10 text-sm"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <select
-                            className="input-base text-sm py-1.5 h-10 w-32"
-                            value={priorityFilter}
-                            onChange={(e) => setPriorityFilter(e.target.value)}
-                        >
-                            <option value="All">All Priorities</option>
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
-                        </select>
-                        <button className="btn-secondary h-10">
+                    <div className="flex items-center gap-2 w-full lg:w-auto">
+                        <div className="flex-1 lg:w-40">
+                            <select
+                                className="input-base text-xs sm:text-sm h-10"
+                                value={priorityFilter}
+                                onChange={(e) => setPriorityFilter(e.target.value)}
+                            >
+                                <option value="All">All Priorities</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <button className="btn-secondary h-10 px-3 shrink-0">
                             <Filter className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
 
-                {/* List */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Sender</th>
-                                <th className="px-6 py-4">Inquiry details</th>
-                                <th className="px-6 py-4">Priority</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Assignee</th>
-                                <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredInquiries.length > 0 ? filteredInquiries.map((inq, idx) => (
-                                <tr key={idx} onClick={() => openDetails(inq)} className="hover:bg-brand-bg/30 transition-colors group cursor-pointer">
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-navy hover:text-primary transition-colors">{inq.name}</span>
-                                            <span className="text-xs text-brand-muted">{inq.email}</span>
+                <DataTable
+                    headers={[
+                        "Sender",
+                        "Inquiry details",
+                        { content: "Priority", className: "hidden sm:table-cell" },
+                        "Status",
+                        { content: "Assignee", className: "hidden md:table-cell" },
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {filteredInquiries.length > 0 ? filteredInquiries.map((inq, idx) => (
+                        <tr key={idx} onClick={() => openDetails(inq)} className="hover:bg-brand-bg/30 transition-colors group cursor-pointer">
+                            <td>
+                                <div className="flex flex-col min-w-[150px]">
+                                    <span className="text-sm font-bold text-navy hover:text-primary transition-colors">{inq.name}</span>
+                                    <span className="text-[11px] text-brand-muted">{inq.email}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div className="flex flex-col min-w-[180px]">
+                                    <span className="text-sm font-medium text-charcoal">{inq.subject}</span>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-[10px] text-brand-muted font-semibold bg-brand-bg px-1.5 py-0.5 rounded w-fit">{inq.type}</span>
+                                        <span className="sm:hidden flex items-center gap-1 text-[10px] font-bold text-red-600">
+                                            <Flag className="w-3 h-3 fill-current" />
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td className="hidden sm:table-cell">
+                                <div className={cn(
+                                    "flex items-center gap-1.5 text-xs font-bold",
+                                    inq.priority === "High" ? "text-red-600" :
+                                        inq.priority === "Medium" ? "text-orange-600" : "text-blue-600"
+                                )}>
+                                    <Flag className="w-3.5 h-3.5 fill-current" />
+                                    {inq.priority}
+                                </div>
+                            </td>
+                            <td>
+                                <StatusBadge status={inq.status} />
+                            </td>
+                            <td className="hidden md:table-cell">
+                                {inq.owner === "Unassigned" ? (
+                                    <button
+                                        className="text-[10px] font-black text-primary flex items-center gap-1 uppercase tracking-tight hover:underline relative z-10"
+                                        onClick={(e) => { e.stopPropagation(); handleAssign(inq.id, "John Admin"); }}
+                                    >
+                                        <UserCheck className="w-3 h-3" /> Assign Me
+                                    </button>
+                                ) : (
+                                    <div className="flex items-center gap-1.5 relative z-10">
+                                        <div className="w-5 h-5 rounded-full bg-blue-100 text-primary flex items-center justify-center text-[10px] font-bold">
+                                            {inq.owner.charAt(0)}
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-medium text-charcoal truncate max-w-[200px]">{inq.subject}</span>
-                                            <span className="text-[10px] text-brand-muted font-semibold bg-brand-bg inline-block px-1.5 py-0.5 rounded w-fit mt-1">{inq.type}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className={cn(
-                                            "flex items-center gap-1.5 text-xs font-bold",
-                                            inq.priority === "High" ? "text-red-600" :
-                                                inq.priority === "Medium" ? "text-orange-600" : "text-blue-600"
-                                        )}>
-                                            <Flag className="w-3.5 h-3.5 fill-current" />
-                                            {inq.priority}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={inq.status} />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {inq.owner === "Unassigned" ? (
-                                            <button
-                                                className="text-[10px] font-bold text-primary flex items-center gap-1 hover:underline relative z-10"
-                                                onClick={(e) => { e.stopPropagation(); handleAssign(inq.id, "John Admin"); }}
-                                            >
-                                                <UserCheck className="w-3 h-3" /> Assign Me
-                                            </button>
-                                        ) : (
-                                            <div className="flex items-center gap-1.5 relative z-10">
-                                                <div className="w-5 h-5 rounded-full bg-blue-100 text-primary flex items-center justify-center text-[10px] font-bold">
-                                                    {inq.owner.charAt(0)}
-                                                </div>
-                                                <span className="text-xs text-charcoal font-medium">{inq.owner}</span>
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-charcoal">{inq.date}</span>
-                                            <span className="text-[10px] text-brand-muted">{inq.time}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="btn-secondary py-1 px-2.5 text-xs">Manage</button>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="7" className="px-6 py-12 text-center text-brand-muted">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <MessageSquare className="w-12 h-12 text-brand-border mb-3" />
-                                            <p className="font-bold text-navy text-lg">No inquiries found</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        <span className="text-xs text-charcoal font-medium">{inq.owner}</span>
+                                    </div>
+                                )}
+                            </td>
+                            <td className="text-right">
+                                <button className="btn-secondary py-1 px-3 text-[11px] sm:text-xs min-h-[32px]">Manage</button>
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="6" className="px-6 py-12 text-center text-brand-muted">
+                                <div className="flex flex-col items-center justify-center">
+                                    <MessageSquare className="w-10 h-10 text-brand-border mb-3" />
+                                    <p className="font-bold text-navy text-base">No inquiries found</p>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                </DataTable>
 
-                {/* Pagination Footer */}
-                <div className="p-4 bg-brand-bg/30 border-t border-brand-border flex items-center justify-between">
-                    <span className="text-xs text-brand-muted font-medium">Page 1 of 1</span>
+                <div className="p-3 sm:p-4 bg-brand-bg/30 border-t border-brand-border flex items-center justify-between">
+                    <span className="text-[10px] sm:text-xs text-brand-muted font-medium italic">Showing {filteredInquiries.length} of {inquiries.length} inquiries</span>
                     <div className="flex items-center gap-2">
-                        <button className="p-2 border border-brand-border bg-white rounded-lg hover:bg-brand-bg transition-colors disabled:opacity-50" disabled>
-                            <ChevronLeft className="w-4 h-4" />
+                        <button className="p-1.5 sm:p-2 border border-brand-border bg-white rounded-lg hover:bg-brand-bg transition-colors disabled:opacity-30 shrink-0" disabled>
+                            <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
-                        <button className="p-2 border border-brand-border bg-white rounded-lg hover:bg-brand-bg transition-colors disabled:opacity-50" disabled>
-                            <ChevronRight className="w-4 h-4" />
+                        <button className="p-1.5 sm:p-2 border border-brand-border bg-white rounded-lg hover:bg-brand-bg transition-colors disabled:opacity-30 shrink-0" disabled>
+                            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
                     </div>
                 </div>

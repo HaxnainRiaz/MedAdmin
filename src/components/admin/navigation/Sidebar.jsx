@@ -8,40 +8,53 @@ import { cn } from "@/lib/admin-utils";
 import { ChevronLeft, ChevronRight, LogOut, Search } from "lucide-react";
 import { useToast } from "@/components/admin/shared/ToastProvider";
 
-const Sidebar = ({ isCollapsed, onToggle }) => {
+const Sidebar = ({ isCollapsed, onToggle, isMobileOpen, onMobileClose }) => {
     const pathname = usePathname();
     const { triggerToast } = useToast();
 
     return (
         <aside
             className={cn(
-                "fixed left-0 top-0 h-screen bg-white border-r border-brand-border z-50 transition-all duration-300 ease-in-out flex flex-col",
-                isCollapsed ? "w-[80px]" : "w-[280px]"
+                "fixed left-0 top-0 h-screen bg-white border-r border-brand-border z-[60] transition-all duration-300 ease-in-out flex flex-col",
+                // Mobile behavior
+                isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+                // Desktop behavior
+                isCollapsed ? "lg:w-[80px]" : "lg:w-[280px]",
+                "w-[280px]" // Base width for drawer
             )}
         >
             {/* Brand Logo */}
-            <div className="h-[var(--header-height)] flex items-center px-6 border-bottom border-brand-border">
+            <div className="h-[var(--header-height)] flex items-center px-6 border-b border-brand-border">
                 <Link href="/admin" className="flex items-center gap-3 overflow-hidden">
                     <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
                         <span className="text-white font-bold text-xl">M</span>
                     </div>
-                    {!isCollapsed && (
-                        <span className="font-bold text-xl text-navy tracking-tight">
-                            Medify<span className="text-primary">Admin</span>
-                        </span>
-                    )}
+                    <span className={cn(
+                        "font-bold text-xl text-navy tracking-tight transition-opacity duration-200",
+                        isCollapsed ? "lg:opacity-0 lg:pointer-events-none" : "opacity-100"
+                    )}>
+                        Medify<span className="text-primary">Admin</span>
+                    </span>
                 </Link>
+                {/* Mobile Close Button */}
+                <button
+                    onClick={onMobileClose}
+                    className="lg:hidden ml-auto p-2 hover:bg-brand-bg rounded-lg transition-colors"
+                >
+                    <ChevronLeft className="w-5 h-5 text-brand-muted" />
+                </button>
             </div>
 
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto py-6 scrollbar-hide px-3">
                 {adminNavigation.map((group, groupIndex) => (
                     <div key={groupIndex} className="mb-8">
-                        {!isCollapsed && (
-                            <h3 className="px-3 mb-2 text-xs font-semibold text-brand-muted uppercase tracking-wider">
-                                {group.group}
-                            </h3>
-                        )}
+                        <h3 className={cn(
+                            "px-3 mb-2 text-xs font-semibold text-brand-muted uppercase tracking-wider transition-opacity",
+                            isCollapsed ? "lg:opacity-0" : "opacity-100"
+                        )}>
+                            {group.group}
+                        </h3>
                         <ul className="space-y-1">
                             {group.items.map((item, itemIndex) => {
                                 const Icon = item.icon;
@@ -59,16 +72,19 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
                                             )}
                                         >
                                             <Icon className={cn("w-5 h-5 shrink-0", isActive ? "text-primary" : "text-brand-muted group-hover:text-navy")} />
-                                            {!isCollapsed && (
-                                                <span className="flex-1 truncate">{item.name}</span>
-                                            )}
+                                            <span className={cn(
+                                                "flex-1 truncate transition-opacity duration-200",
+                                                isCollapsed ? "lg:opacity-0 lg:pointer-events-none" : "opacity-100"
+                                            )}>
+                                                {item.name}
+                                            </span>
                                             {!isCollapsed && item.badge && (
                                                 <span className="px-2 py-0.5 text-[10px] font-bold bg-primary text-white rounded-full">
                                                     {item.badge}
                                                 </span>
                                             )}
                                             {isCollapsed && (
-                                                <div className="absolute left-[calc(100%+8px)] top-1/2 -translate-y-1/2 px-2 py-1 bg-navy text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                                                <div className="hidden lg:block absolute left-[calc(100%+8px)] top-1/2 -translate-y-1/2 px-2 py-1 bg-navy text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                                                     {item.name}
                                                 </div>
                                             )}
@@ -85,7 +101,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
             <div className="p-3 border-t border-brand-border">
                 <button
                     onClick={onToggle}
-                    className="w-full flex items-center justify-center gap-3 p-2.5 rounded-lg text-charcoal hover:bg-brand-bg transition-colors"
+                    className="hidden lg:flex w-full items-center justify-center gap-3 p-2.5 rounded-lg text-charcoal hover:bg-brand-bg transition-colors"
                 >
                     {isCollapsed ? <ChevronRight className="w-5 h-5" /> : (
                         <>
@@ -94,15 +110,18 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
                         </>
                     )}
                 </button>
-                {!isCollapsed && (
+                <div className={cn(
+                    "mt-2 transition-all duration-200",
+                    isCollapsed ? "lg:opacity-0 lg:h-0 overflow-hidden" : "opacity-100"
+                )}>
                     <button
                         onClick={() => triggerToast("Signed out successfully (Mock)", "success")}
-                        className="mt-2 w-full flex items-center gap-3 p-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                        className="w-full flex items-center gap-3 p-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
                     >
                         <LogOut className="w-5 h-5" />
                         <span className="text-sm font-medium">Sign Out</span>
                     </button>
-                )}
+                </div>
             </div>
         </aside>
     );

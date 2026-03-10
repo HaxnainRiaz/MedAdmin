@@ -52,12 +52,9 @@ export const adminNavigation = [
     {
         group: "Website Content",
         items: [
-            { name: "Pages", href: "/admin/pages", icon: FileText },
-            { name: "Homepage Sections", href: "/admin/homepage-sections", icon: PanelsTopLeft },
             { name: "Blog", href: "/admin/blog", icon: Newspaper },
             { name: "FAQ", href: "/admin/faq", icon: CircleHelp },
             { name: "Legal Documents", href: "/admin/legal", icon: ShieldCheck },
-            { name: "Media Library", href: "/admin/media", icon: Image },
         ],
     },
     {

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     ShieldCheck,
     Search,
@@ -65,14 +66,14 @@ const LegalDocumentsPage = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">Legal Documents</h2>
-                    <p className="text-brand-muted text-sm">Manage compliance, privacy policies, and terms of use.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">Legal Documents</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage compliance and privacy policies.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
-                        className="btn-primary"
+                        className="btn-primary w-full sm:w-auto"
                         onClick={openCreate}
                     >
                         <Plus className="w-4 h-4" />
@@ -82,88 +83,86 @@ const LegalDocumentsPage = () => {
             </div>
 
             <div className="admin-card overflow-hidden">
-                <div className="p-4 border-b border-brand-border flex items-center justify-between">
-                    <div className="relative flex-1 max-w-sm">
+                <div className="p-3 sm:p-4 border-b border-brand-border flex items-center justify-between">
+                    <div className="relative flex-1 max-w-sm w-full">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
                         <input
                             type="text"
                             placeholder="Search legal docs..."
-                            className="input-base pl-10 h-10"
+                            className="input-base pl-10 h-10 text-sm"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Document Details</th>
-                                <th className="px-6 py-4">Version & Updated</th>
-                                <th className="px-6 py-4">Acceptance Rules</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredDocs.map((doc, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-brand-bg rounded-xl flex items-center justify-center border border-brand-border shrink-0 text-navy group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
-                                                <ShieldCheck className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-navy hover:text-primary cursor-pointer transition-colors max-w-[200px] truncate">{doc.title}</span>
-                                                <span className="text-[10px] text-brand-muted font-mono">{doc.route}</span>
-                                            </div>
+                <DataTable
+                    headers={[
+                        "Document Details",
+                        { content: "Version & Updated", className: "hidden sm:table-cell" },
+                        { content: "Acceptance Rules", className: "hidden lg:table-cell" },
+                        "Status",
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {filteredDocs.map((doc, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td>
+                                <div className="flex items-center gap-2 sm:gap-3 min-w-[150px]">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-brand-bg rounded-lg sm:rounded-xl flex items-center justify-center border border-brand-border shrink-0 text-navy group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
+                                        <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0 flex-1">
+                                        <span className="text-sm font-bold text-navy hover:text-primary cursor-pointer transition-colors">{doc.title}</span>
+                                        <span className="text-[10px] text-brand-muted font-mono">{doc.route}</span>
+                                        <div className="sm:hidden flex items-center gap-2 mt-1">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-brand-muted bg-brand-bg px-1.5 py-0.5 rounded">{doc.version}</span>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col">
-                                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-brand-bg border border-brand-border rounded-md text-[10px] font-black tracking-widest uppercase text-navy w-fit inline-flex mb-1">
-                                                <History className="w-3 h-3 text-brand-muted shrink-0" /> {doc.version}
-                                            </div>
-                                            <span className="text-[10px] text-brand-muted font-bold tracking-widest uppercase">{doc.lastUpdated}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`text-[10px] font-black tracking-widest uppercase px-2 py-1 rounded inline-flex ${doc.requiresAcceptance ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700'}`}>
-                                            {doc.requiresAcceptance ? 'Explicit Consent' : 'Passive Reading'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 flex items-center gap-4">
-                                        <StatusBadge status={doc.status} />
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy"
-                                                title="View live page"
-                                                onClick={() => triggerToast(`Viewing ${doc.title} online`, "info")}
-                                            >
-                                                <Globe className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary"
-                                                onClick={() => openEdit(doc)}
-                                            >
-                                                <Edit3 className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500"
-                                                onClick={() => handleDelete(doc.id)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td className="hidden sm:table-cell">
+                                <div className="flex flex-col min-w-[120px]">
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-brand-bg border border-brand-border rounded-md text-[10px] font-black tracking-widest uppercase text-navy w-fit inline-flex mb-1">
+                                        <History className="w-3 h-3 text-brand-muted shrink-0" /> {doc.version}
+                                    </div>
+                                    <span className="text-[10px] text-brand-muted font-bold tracking-widest uppercase">{doc.lastUpdated}</span>
+                                </div>
+                            </td>
+                            <td className="hidden lg:table-cell">
+                                <span className={`text-[10px] font-black tracking-widest uppercase px-2 py-1 rounded inline-flex ${doc.requiresAcceptance ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    {doc.requiresAcceptance ? 'Explicit Consent' : 'Passive Reading'}
+                                </span>
+                            </td>
+                            <td>
+                                <StatusBadge status={doc.status} />
+                            </td>
+                            <td className="text-right">
+                                <div className="flex items-center justify-end gap-1 sm:gap-2">
+                                    <button
+                                        className="p-1.5 sm:p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy hidden sm:block"
+                                        title="View live page"
+                                        onClick={() => triggerToast(`Viewing ${doc.title} online`, "info")}
+                                    >
+                                        <Globe className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        className="p-1.5 sm:p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary"
+                                        onClick={() => openEdit(doc)}
+                                    >
+                                        <Edit3 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        className="p-1.5 sm:p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500"
+                                        onClick={() => handleDelete(doc.id)}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </DataTable>
             </div>
 
             {/* Create/Edit Modal */}

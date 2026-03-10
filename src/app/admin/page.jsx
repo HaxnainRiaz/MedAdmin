@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import KpiCard from "@/components/admin/dashboard/KpiCard";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import { useToast } from "@/components/admin/shared/ToastProvider";
 import {
     Calendar,
@@ -102,135 +103,153 @@ const DashboardPage = () => {
             </div>
 
             {/* KPI Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {kpis.map((kpi, idx) => (
                     <KpiCard key={idx} {...kpi} />
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 overflow-x-hidden">
                 {/* Main Content: Recent Appointments */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-2 space-y-6 lg:space-y-8 min-w-0">
                     <div className="admin-card">
-                        <div className="p-6 border-b border-brand-border flex items-center justify-between">
-                            <h3 className="text-lg font-bold text-navy">Upcoming Appointments</h3>
+                        <div className="p-4 sm:p-6 border-b border-brand-border flex items-center justify-between gap-4">
+                            <h3 className="text-base sm:text-lg font-bold text-navy truncate">Upcoming Appointments</h3>
                             <button
-                                className="text-primary text-sm font-semibold flex items-center gap-1 hover:underline"
+                                className="text-primary text-xs sm:text-sm font-semibold flex items-center gap-1 hover:underline whitespace-nowrap shrink-0"
                                 onClick={() => router.push("/admin/appointments")}
                             >
-                                View all <ArrowRight className="w-4 h-4" />
+                                <span className="hidden sm:inline">View all</span>
+                                <span className="sm:hidden">All</span>
+                                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </button>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead>
-                                    <tr className="bg-brand-bg text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                        <th className="px-6 py-4">ID</th>
-                                        <th className="px-6 py-4">Patient</th>
-                                        <th className="px-6 py-4">Doctor</th>
-                                        <th className="px-6 py-4">Time</th>
-                                        <th className="px-6 py-4">Status</th>
-                                        <th className="px-6 py-4">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-brand-border text-sm">
-                                    {recentAppointments.map((apt, idx) => (
-                                        <tr key={idx} className="hover:bg-brand-bg/50 transition-colors group relative">
-                                            <td className="px-6 py-4 font-medium text-navy">{apt.id}</td>
-                                            <td className="px-6 py-4 text-charcoal">{apt.patient}</td>
-                                            <td className="px-6 py-4 text-charcoal">{apt.doctor}</td>
-                                            <td className="px-6 py-4 text-charcoal">
-                                                <div className="flex items-center gap-1.5">
-                                                    <Clock className="w-3.5 h-3.5 text-brand-muted" />
-                                                    {apt.time}
+                        <DataTable
+                            headers={[
+                                "ID",
+                                "Patient",
+                                "Doctor",
+                                "Time",
+                                "Status",
+                                { content: "Action", className: "hidden space-x-1 sm:table-cell text-right" }
+                            ]}
+                        >
+                            {recentAppointments.map((apt, idx) => (
+                                <tr key={idx} className="hover:bg-brand-bg/50 space-x-1 transition-colors group relative">
+                                    <td className="font-semibold text-navy">{apt.id}</td>
+                                    <td className="text-charcoal font-medium">
+                                        {apt.patient}
+                                    </td>
+                                    <td className="text-charcoal bg-transparent">
+                                        {apt.doctor}
+                                    </td>
+                                    <td className="text-charcoal whitespace-nowrap">
+                                        <div className="flex items-center gap-1.5">
+                                            <Clock className="w-3.5 h-3.5 text-brand-muted" />
+                                            <span className="text-[13px]">{apt.time}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <StatusBadge status={apt.status} />
+                                    </td>
+                                    <td className="text-right">
+                                        <button
+                                            onClick={() => setActiveAptPopup(activeAptPopup === apt.id ? null : apt.id)}
+                                            className="p-1.5 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy"
+                                        >
+                                            <MoreVertical className="w-4 h-4" />
+                                        </button>
+                                        {activeAptPopup === apt.id && (
+                                            <>
+                                                <div
+                                                    className="fixed inset-0 z-40"
+                                                    onClick={() => setActiveAptPopup(null)}
+                                                />
+                                                <div className="absolute right-4 mt-1 sm:right-10 z-50 bg-white border border-brand-border rounded-xl shadow-premium p-1 min-w-[180px] text-left">
+                                                    <button
+                                                        onClick={() => { router.push("/admin/appointments"); setActiveAptPopup(null); }}
+                                                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-navy hover:bg-brand-bg rounded-lg transition-colors font-medium whitespace-nowrap"
+                                                    >
+                                                        <Eye className="w-4 h-4 text-brand-muted" /> View Details
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { changeAptStatus(apt.id, "Confirmed"); setActiveAptPopup(null); }}
+                                                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors font-medium whitespace-nowrap"
+                                                    >
+                                                        <CheckCircle2 className="w-4 h-4" /> Confirm
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { changeAptStatus(apt.id, "Cancelled"); setActiveAptPopup(null); }}
+                                                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium whitespace-nowrap"
+                                                    >
+                                                        <X className="w-4 h-4" /> Cancel
+                                                    </button>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <StatusBadge status={apt.status} />
-                                            </td>
-                                            <td className="px-6 py-4 relative">
-                                                <button
-                                                    onClick={() => setActiveAptPopup(activeAptPopup === apt.id ? null : apt.id)}
-                                                    className="p-1.5 hover:bg-brand-bg rounded-lg transition-colors"
-                                                >
-                                                    <MoreVertical className="w-4 h-4 text-brand-muted" />
-                                                </button>
-                                                {activeAptPopup === apt.id && (
-                                                    <div className="absolute right-4 top-12 z-50 bg-white border border-brand-border rounded-xl shadow-premium p-1 min-w-[180px]">
-                                                        <button onClick={() => { router.push("/admin/appointments"); setActiveAptPopup(null); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-navy hover:bg-brand-bg rounded-lg transition-colors font-medium">
-                                                            <Eye className="w-4 h-4 text-brand-muted" /> View Details
-                                                        </button>
-                                                        <button onClick={() => changeAptStatus(apt.id, "Confirmed")} className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors font-medium">
-                                                            <CheckCircle2 className="w-4 h-4" /> Confirm
-                                                        </button>
-                                                        <button onClick={() => changeAptStatus(apt.id, "Cancelled")} className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium">
-                                                            <X className="w-4 h-4" /> Cancel
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </DataTable>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="admin-card p-6">
-                            <h3 className="text-lg font-bold text-navy mb-4">Operations Status</h3>
-                            <div className="space-y-4">
+                        <div className="admin-card p-4 sm:p-6">
+                            <h3 className="text-base sm:text-lg font-bold text-navy mb-4 sm:mb-6">Operations Status</h3>
+                            <div className="space-y-3 sm:space-y-4">
                                 {[
                                     { label: "Phone Support", status: "Active", time: "08:00 - 20:00" },
-                                    { label: "Critical Inquiries", status: "2 Pending", time: "Last check: 5m ago" },
+                                    { label: "Critical Inquiries", status: "2 Pending", time: "5m ago" },
                                     { label: "Server Load", status: "Normal", time: "99.9% uptime" }
                                 ].map((item, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-3 bg-brand-bg rounded-xl">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-semibold text-navy">{item.label}</span>
-                                            <span className="text-xs text-brand-muted">{item.time}</span>
+                                    <div key={idx} className="flex items-center justify-between p-3 sm:p-4 bg-brand-bg rounded-xl gap-3">
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="text-sm font-semibold text-navy truncate">{item.label}</span>
+                                            <span className="text-[11px] text-brand-muted whitespace-nowrap">{item.time}</span>
                                         </div>
-                                        <StatusBadge status={item.status} />
+                                        <div className="shrink-0">
+                                            <StatusBadge status={item.status} />
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="admin-card p-6">
-                            <h3 className="text-lg font-bold text-navy mb-4">Content Summary</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between p-3 border border-brand-border rounded-xl">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                        <div className="admin-card p-4 sm:p-6">
+                            <h3 className="text-base sm:text-lg font-bold text-navy mb-4 sm:mb-6">Content Summary</h3>
+                            <div className="space-y-3 sm:space-y-4">
+                                <div className="flex items-center justify-between p-3 sm:p-4 border border-brand-border rounded-xl gap-3 bg-white/50">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
                                             <Clock className="w-5 h-5" />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-navy">Draft Posts</p>
-                                            <p className="text-xs text-brand-muted">5 waiting review</p>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-navy truncate">Draft Posts</p>
+                                            <p className="text-[11px] text-brand-muted whitespace-nowrap">5 waiting</p>
                                         </div>
                                     </div>
                                     <button
                                         onClick={() => router.push("/admin/blog")}
-                                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                                        className="text-[11px] font-bold text-primary hover:underline whitespace-nowrap shrink-0"
                                     >
-                                        Review <ChevronRight className="w-3.5 h-3.5" />
+                                        Review <ChevronRight className="w-3.5 h-3.5 inline" />
                                     </button>
                                 </div>
-                                <div className="flex items-center justify-between p-3 border border-brand-border rounded-xl">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                                <div className="flex items-center justify-between p-3 sm:p-4 border border-brand-border rounded-xl gap-3 bg-white/50">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
                                             <CheckCircle2 className="w-5 h-5" />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-navy">FAQ Updates</p>
-                                            <p className="text-xs text-brand-muted">All items published</p>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-navy truncate">FAQ Updates</p>
+                                            <p className="text-[11px] text-brand-muted whitespace-nowrap">All published</p>
                                         </div>
                                     </div>
                                     <button
                                         onClick={() => router.push("/admin/faq")}
-                                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                                        className="text-[11px] font-bold text-primary hover:underline whitespace-nowrap shrink-0"
                                     >
-                                        View <ChevronRight className="w-3.5 h-3.5" />
+                                        View <ChevronRight className="w-3.5 h-3.5 inline" />
                                     </button>
                                 </div>
                             </div>
@@ -239,74 +258,74 @@ const DashboardPage = () => {
                 </div>
 
                 {/* Sidebar: Alerts & Activity */}
-                <div className="space-y-6">
-                    <div className="admin-card p-6">
-                        <h3 className="text-lg font-bold text-navy mb-4">System Alerts</h3>
-                        <div className="space-y-3">
+                <div className="space-y-6 lg:space-y-8 min-w-0">
+                    <div className="admin-card p-4 sm:p-6">
+                        <h3 className="text-base sm:text-lg font-bold text-navy mb-4 sm:mb-6">System Alerts</h3>
+                        <div className="space-y-3 sm:space-y-4">
                             {alerts.length > 0 ? alerts.map((alert, idx) => (
                                 <div key={idx} className={cn(
-                                    "p-4 rounded-xl border flex gap-3 group relative",
+                                    "p-3 sm:p-4 rounded-xl border flex gap-3 group relative transition-all",
                                     alert.type === "error" ? "bg-red-50 border-red-100" :
                                         alert.type === "warning" ? "bg-orange-50 border-orange-100" :
                                             "bg-emerald-50 border-emerald-100"
                                 )}>
                                     <AlertCircle className={cn(
-                                        "w-5 h-5 shrink-0",
+                                        "w-5 h-5 mt-0.5 shrink-0",
                                         alert.type === "error" ? "text-red-600" :
                                             alert.type === "warning" ? "text-orange-600" :
                                                 "text-emerald-600"
                                     )} />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-navy">{alert.title}</p>
-                                        <p className="text-xs text-charcoal/80 leading-relaxed mt-0.5">{alert.desc}</p>
+                                    <div className="flex-1 min-w-0 mr-4 sm:mr-0">
+                                        <p className="text-xs sm:text-sm font-bold text-navy line-clamp-1">{alert.title}</p>
+                                        <p className="text-[11px] sm:text-xs text-charcoal/80 leading-relaxed mt-1 line-clamp-2">{alert.desc}</p>
                                     </div>
                                     <button
                                         onClick={() => dismissAlert(alert.id)}
-                                        className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-0.5 hover:bg-black/10 rounded"
+                                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-1.5 hover:bg-black/5 rounded-lg shrink-0 absolute top-2 right-2 sm:static"
                                     >
                                         <X className="w-3.5 h-3.5 text-charcoal/60" />
                                     </button>
                                 </div>
                             )) : (
-                                <div className="py-6 text-center">
-                                    <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                                    <p className="text-sm font-bold text-navy">All clear!</p>
-                                    <p className="text-xs text-brand-muted">No system alerts</p>
+                                <div className="py-10 text-center bg-brand-bg rounded-xl border border-dashed border-brand-border">
+                                    <CheckCircle2 className="w-10 h-10 text-emerald-500/50 mx-auto mb-3" />
+                                    <p className="text-sm font-bold text-navy">No new alerts</p>
+                                    <p className="text-xs text-brand-muted">Everything is running smoothly</p>
                                 </div>
                             )}
                         </div>
                         {alerts.length > 0 && (
                             <button
                                 onClick={() => setAlerts([])}
-                                className="w-full mt-4 py-2 text-xs font-bold text-brand-muted hover:text-navy transition-colors"
+                                className="w-full mt-4 sm:mt-6 py-2 sm:py-2.5 text-xs font-bold text-brand-muted hover:text-navy transition-colors border border-brand-border rounded-lg hover:bg-brand-bg/50"
                             >
                                 Dismiss All
                             </button>
                         )}
                     </div>
 
-                    <div className="admin-card p-6">
-                        <h3 className="text-lg font-bold text-navy mb-4">Recent Activity</h3>
-                        <div className="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-0 before:w-px before:bg-brand-border">
+                    <div className="admin-card p-4 sm:p-6">
+                        <h3 className="text-base sm:text-lg font-bold text-navy mb-5 sm:mb-8">Recent Activity</h3>
+                        <div className="space-y-6 sm:space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-0 before:w-px before:bg-brand-border">
                             {[
                                 { actor: "John Admin", action: "published a blog post", target: "Healthy Heart Tips", time: "2h ago", link: "/admin/blog" },
                                 { actor: "Sarah Support", action: "resolved inquiry", target: "Pricing Question", time: "4h ago", link: "/admin/inquiries" },
                                 { actor: "System", action: "updated legal document", target: "Privacy Policy", time: "1d ago", link: "/admin/legal" },
                                 { actor: "Mike Op", action: "added new doctor", target: "Dr. Rachel Green", time: "1d ago", link: "/admin/doctors" },
                             ].map((activity, idx) => (
-                                <div key={idx} className="flex gap-4 relative">
-                                    <div className="w-[22px] h-[22px] rounded-full bg-white border-2 border-primary shrink-0 z-10"></div>
-                                    <div className="flex flex-col">
-                                        <p className="text-sm text-charcoal">
-                                            <span className="font-bold text-navy">{activity.actor}</span> {activity.action}{" "}
+                                <div key={idx} className="flex gap-4 relative group">
+                                    <div className="w-[23px] h-[23px] rounded-full bg-white border-2 border-primary shrink-0 z-10 shadow-sm group-hover:scale-110 transition-transform"></div>
+                                    <div className="flex flex-col min-w-0 pt-0.5">
+                                        <div className="text-[13px] sm:text-sm text-charcoal leading-snug">
+                                            <span className="font-bold text-navy whitespace-nowrap">{activity.actor}</span> {activity.action}{" "}
                                             <button
                                                 onClick={() => router.push(activity.link)}
-                                                className="font-bold text-navy hover:text-primary transition-colors underline-offset-2 hover:underline"
+                                                className="font-bold text-navy hover:text-primary transition-colors underline-offset-2 hover:underline decoration-primary/30 text-left"
                                             >
                                                 "{activity.target}"
                                             </button>
-                                        </p>
-                                        <span className="text-[10px] text-brand-muted mt-1 font-medium">{activity.time}</span>
+                                        </div>
+                                        <span className="text-[10px] text-brand-muted mt-1.5 font-medium">{activity.time}</span>
                                     </div>
                                 </div>
                             ))}

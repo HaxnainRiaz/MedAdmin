@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     History,
     Search,
@@ -106,74 +107,69 @@ const AuditLogsPage = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Action & Entity</th>
-                                <th className="px-6 py-4">Performed By</th>
-                                <th className="px-6 py-4">Timestamp & IP</th>
-                                <th className="px-6 py-4">Severity</th>
-                                <th className="px-6 py-4 text-right">Details</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filtered.map((log, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-navy">{log.action}</span>
-                                            <span className="text-[10px] text-brand-muted uppercase font-black tracking-widest mt-1">{log.entity}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="flex items-center gap-1.5 text-xs font-bold text-charcoal">
-                                            <User className="w-3 h-3 text-brand-muted" />
-                                            {log.user}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-1">
-                                            <span className="flex items-center gap-1.5 text-xs text-brand-muted font-medium">
-                                                <Clock className="w-3 h-3 text-primary" />
-                                                {log.date}
-                                            </span>
-                                            <span className="flex items-center gap-1.5 text-[10px] font-mono text-brand-muted">
-                                                <Laptop className="w-3 h-3 text-brand-muted" />
-                                                {log.ip}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={cn(
-                                            "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded",
-                                            severityStyles[log.severity]
-                                        )}>
-                                            {log.severity}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            className="p-2 hover:bg-primary/10 rounded-lg transition-colors text-brand-muted hover:text-primary"
-                                            onClick={() => openDetail(log)}
-                                            title="View log detail"
-                                        >
-                                            <Eye className="w-4 h-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {filtered.length === 0 && (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center">
-                                        <History className="w-10 h-10 text-brand-border mx-auto mb-3" />
-                                        <p className="font-bold text-navy">No logs match your filters</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    headers={[
+                        "Action & Entity",
+                        "Performed By",
+                        "Timestamp & IP",
+                        "Severity",
+                        { content: "Details", className: "text-right" }
+                    ]}
+                >
+                    {filtered.map((log, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-navy">{log.action}</span>
+                                    <span className="text-[10px] text-brand-muted uppercase font-black tracking-widest mt-1">{log.entity}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span className="flex items-center gap-1.5 text-xs font-bold text-charcoal">
+                                    <User className="w-3 h-3 text-brand-muted" />
+                                    {log.user}
+                                </span>
+                            </td>
+                            <td>
+                                <div className="flex flex-col gap-1">
+                                    <span className="flex items-center gap-1.5 text-xs text-brand-muted font-medium">
+                                        <Clock className="w-3 h-3 text-primary" />
+                                        {log.date}
+                                    </span>
+                                    <span className="flex items-center gap-1.5 text-[10px] font-mono text-brand-muted">
+                                        <Laptop className="w-3 h-3 text-brand-muted" />
+                                        {log.ip}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <span className={cn(
+                                    "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded",
+                                    severityStyles[log.severity]
+                                )}>
+                                    {log.severity}
+                                </span>
+                            </td>
+                            <td className="text-right">
+                                <button
+                                    className="p-2 hover:bg-primary/10 rounded-lg transition-colors text-brand-muted hover:text-primary"
+                                    onClick={() => openDetail(log)}
+                                    title="View log detail"
+                                >
+                                    <Eye className="w-4 h-4" />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                    {filtered.length === 0 && (
+                        <tr>
+                            <td colSpan="5" className="px-6 py-12 text-center">
+                                <History className="w-10 h-10 text-brand-border mx-auto mb-3" />
+                                <p className="font-bold text-navy">No logs match your filters</p>
+                            </td>
+                        </tr>
+                    )}
+                </DataTable>
             </div>
 
             {/* Log Detail Modal */}

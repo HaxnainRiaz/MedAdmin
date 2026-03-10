@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     Search,
     Filter,
@@ -122,63 +123,58 @@ const SubscribersPage = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">Email Address</th>
-                                <th className="px-6 py-4">Source</th>
-                                <th className="px-6 py-4">Date Subscribed</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredSubscribers.length > 0 ? filteredSubscribers.map((sub, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-brand-muted" />
-                                            <span className="text-sm font-bold text-navy">{sub.email}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-xs text-brand-muted font-bold px-2 py-1 bg-brand-bg rounded-lg border border-brand-border">{sub.source}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 text-xs text-charcoal font-medium">
-                                            <Calendar className="w-3.5 h-3.5 text-brand-muted" />
-                                            {sub.date}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={sub.status} />
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        {sub.status === "Active" ? (
-                                            <button
-                                                className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500 flex items-center gap-2 ml-auto text-xs font-bold"
-                                                onClick={() => handleUnsubscribe(sub.id)}
-                                                title="Unsubscribe User"
-                                            >
-                                                <Ban className="w-4 h-4" />
-                                            </button>
-                                        ) : (
-                                            <span className="text-[10px] text-brand-muted font-bold italic">Unsubscribed</span>
-                                        )}
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-brand-muted">
-                                        <Mail className="w-12 h-12 text-brand-border mx-auto mb-3" />
-                                        <p className="font-bold text-navy text-lg">No subscribers found</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    headers={[
+                        "Email Address",
+                        "Source",
+                        "Date Subscribed",
+                        "Status",
+                        { content: "Actions", className: "text-right" }
+                    ]}
+                >
+                    {filteredSubscribers.length > 0 ? filteredSubscribers.map((sub, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td>
+                                <div className="flex items-center gap-2">
+                                    <Mail className="w-4 h-4 text-brand-muted" />
+                                    <span className="text-sm font-bold text-navy">{sub.email}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span className="text-xs text-brand-muted font-bold px-2 py-1 bg-brand-bg rounded-lg border border-brand-border">{sub.source}</span>
+                            </td>
+                            <td>
+                                <div className="flex items-center gap-1.5 text-xs text-charcoal font-medium">
+                                    <Calendar className="w-3.5 h-3.5 text-brand-muted" />
+                                    {sub.date}
+                                </div>
+                            </td>
+                            <td>
+                                <StatusBadge status={sub.status} />
+                            </td>
+                            <td className="text-right">
+                                {sub.status === "Active" ? (
+                                    <button
+                                        className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500 flex items-center gap-2 ml-auto text-xs font-bold"
+                                        onClick={() => handleUnsubscribe(sub.id)}
+                                        title="Unsubscribe User"
+                                    >
+                                        <Ban className="w-4 h-4" />
+                                    </button>
+                                ) : (
+                                    <span className="text-[10px] text-brand-muted font-bold italic">Unsubscribed</span>
+                                )}
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="5" className="px-6 py-12 text-center text-brand-muted">
+                                <Mail className="w-12 h-12 text-brand-border mx-auto mb-3" />
+                                <p className="font-bold text-navy text-lg">No subscribers found</p>
+                            </td>
+                        </tr>
+                    )}
+                </DataTable>
             </div>
         </div>
     );

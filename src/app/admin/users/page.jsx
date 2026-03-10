@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     Users,
     Search,
@@ -104,104 +105,106 @@ const UsersPage = () => {
                 </div>
             )}
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-navy">System Users</h2>
-                    <p className="text-brand-muted text-sm">Manage dashboard access, staff accounts, and system roles.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-navy">System Users</h2>
+                    <p className="text-brand-muted text-xs sm:text-sm">Manage dashboard access and roles.</p>
                 </div>
-                <button className="btn-primary" onClick={openCreateModal}>
-                    <UserPlus className="w-4 h-4" />
+                <button className="btn-primary flex-1 sm:flex-none py-2 px-3 text-xs sm:text-sm whitespace-nowrap" onClick={openCreateModal}>
+                    <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Invite User
                 </button>
             </div>
 
             <div className="admin-card overflow-hidden">
-                <div className="p-4 border-b border-brand-border flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 flex-1 min-w-[300px]">
-                        <div className="relative w-full md:w-auto md:min-w-[300px]">
+                <div className="p-3 sm:p-4 border-b border-brand-border flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-2 flex-1 w-full">
+                        <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
                             <input
                                 type="text"
-                                placeholder="Search by name, email, role..."
-                                className="input-base pl-10"
+                                placeholder="Search users..."
+                                className="input-base pl-10 h-10 text-sm"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <button className="btn-secondary h-10 px-3">
+                        <button className="btn-secondary h-10 px-3 shrink-0">
                             <Filter className="w-4 h-4" />
                         </button>
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-bold text-brand-muted border-l border-brand-border pl-4">
-                        <span className="flex items-center gap-1"><Users className="w-4 h-4 text-navy" /> {users.length} Total</span>
-                        <span className="flex items-center gap-1"><ShieldAlert className="w-4 h-4 text-primary ml-2" /> {users.filter(u => u.role === "Super Admin").length} Admins</span>
+                    <div className="flex items-center gap-4 text-[11px] sm:text-xs font-bold text-brand-muted sm:border-l sm:border-brand-border sm:pl-4">
+                        <div className="flex items-center gap-1.5 underline decoration-primary/20 underline-offset-4">
+                            <Users className="w-3.5 h-3.5 text-navy" />
+                            <span>{users.length} Total</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 underline decoration-orange-400/20 underline-offset-4">
+                            <ShieldAlert className="w-3.5 h-3.5 text-primary" />
+                            <span>{users.filter(u => u.role === "Super Admin").length} Admins</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">User Details</th>
-                                <th className="px-6 py-4">Role & Access</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Created On</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredUsers.length > 0 ? filteredUsers.map((user, idx) => (
-                                <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20">
-                                                {user.name.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <span className="text-sm font-bold text-navy hover:text-primary transition-colors cursor-pointer" onClick={() => openEditModal(user)}>{user.name}</span>
-                                                <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <Mail className="w-3 h-3 text-brand-muted" />
-                                                    <span className="text-[10px] text-brand-muted">{user.email}</span>
-                                                </div>
-                                            </div>
+                <DataTable
+                    headers={[
+                        "User",
+                        "Access",
+                        "Status",
+                        { content: "Created", className: "hidden sm:table-cell" },
+                        { content: "Action", className: "text-right" }
+                    ]}
+                >
+                    {filteredUsers.length > 0 ? filteredUsers.map((user, idx) => (
+                        <tr key={idx} className="hover:bg-brand-bg/30 transition-colors group">
+                            <td>
+                                <div className="flex items-center gap-3 min-w-[180px]">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20">
+                                        {user.name.charAt(0)}
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-sm font-bold text-navy cursor-pointer hover:text-primary transition-colors" onClick={() => openEditModal(user)}>{user.name}</span>
+                                        <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                            <Mail className="w-3 h-3 text-brand-muted shrink-0" />
+                                            <span className="text-[10px] text-brand-muted">{user.email}</span>
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-brand-border rounded-lg inline-flex shadow-sm">
-                                            {getRoleIcon(user.role)}
-                                            <span className="text-xs font-bold text-charcoal">{user.role}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={user.status} />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-xs font-medium text-brand-muted">{user.created}</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-primary" onClick={() => openEditModal(user)}>
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500" onClick={() => handleDelete(user.id)}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-brand-muted">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <Users className="w-12 h-12 text-brand-border mb-3" />
-                                            <p className="font-bold text-navy text-lg">No users found</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div className="flex items-center gap-1.5 px-2 py-1 bg-white border border-brand-border rounded-lg shadow-premium-sm whitespace-nowrap w-fit">
+                                    {getRoleIcon(user.role)}
+                                    <span className="text-[11px] font-bold text-charcoal">{user.role}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <StatusBadge status={user.status} />
+                            </td>
+                            <td className="hidden sm:table-cell">
+                                <span className="text-[12px] font-medium text-brand-muted whitespace-nowrap">{user.created}</span>
+                            </td>
+                            <td className="text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                    <button className="p-2 hover:bg-brand-bg rounded-lg transition-colors text-brand-muted hover:text-navy" onClick={() => openEditModal(user)}>
+                                        <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                    <button className="p-2 hover:bg-red-50 rounded-lg transition-colors text-brand-muted hover:text-red-500" onClick={() => handleDelete(user.id)}>
+                                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="5" className="px-6 py-12 text-center text-brand-muted">
+                                <div className="flex flex-col items-center justify-center">
+                                    <Users className="w-10 h-10 text-brand-border mb-3" />
+                                    <p className="font-bold text-navy text-base">No users found</p>
+                                    <p className="text-xs">Try searching for something else.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                </DataTable>
             </div>
 
             {/* Create/Edit Modal */}

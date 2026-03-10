@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
 import Modal from "@/components/admin/shared/Modal";
+import DataTable from "@/components/admin/shared/DataTable";
 import {
     Route,
     Search,
@@ -132,63 +133,58 @@ const RouteRegistryPage = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-brand-bg/50 text-[10px] uppercase tracking-wider text-brand-muted font-bold">
-                                <th className="px-6 py-4">URL Path</th>
-                                <th className="px-6 py-4">React Component</th>
-                                <th className="px-6 py-4">Status & Type</th>
-                                <th className="px-6 py-4">Linked CTAs</th>
-                                <th className="px-6 py-4 text-right">Settings</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filtered.map((route, idx) => (
-                                <tr key={idx} className={cn("hover:bg-brand-bg/30 transition-colors group", route.status === "Warning" ? "bg-orange-50/30" : "")}>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <Link2 className="w-4 h-4 text-brand-muted" />
-                                            <span className="text-sm font-mono font-bold text-navy bg-brand-bg px-2 py-0.5 rounded-md border border-brand-border">
-                                                {route.path}
-                                            </span>
-                                        </div>
-                                        {route.status === "Warning" && (
-                                            <p className="text-[10px] text-orange-600 font-bold mt-1.5 flex items-center gap-1">
-                                                <AlertTriangle className="w-3 h-3" /> {route.issue}
-                                            </p>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-xs text-brand-muted font-medium">{route.component}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-1.5">
-                                            <StatusBadge status={route.status} />
-                                            <span className={cn("text-[10px] font-black tracking-widest uppercase inline-flex", route.isDynamic ? "text-purple-600" : "text-brand-muted")}>
-                                                {route.isDynamic ? "Dynamic Segment" : "Static Route"}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center border border-blue-100 mx-auto">
-                                            {route.ctas}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            className="p-2 hover:bg-primary/10 rounded-lg transition-colors text-brand-muted hover:text-primary"
-                                            onClick={() => openDetail(route)}
-                                            title="View route settings"
-                                        >
-                                            <Settings2 className="w-4 h-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    headers={[
+                        "URL Path",
+                        "React Component",
+                        "Status & Type",
+                        { content: "Linked CTAs", className: "text-center" },
+                        { content: "Settings", className: "text-right" }
+                    ]}
+                >
+                    {filtered.map((route, idx) => (
+                        <tr key={idx} className={cn("hover:bg-brand-bg/30 transition-colors group", route.status === "Warning" ? "bg-orange-50/30" : "")}>
+                            <td>
+                                <div className="flex items-center gap-2">
+                                    <Link2 className="w-4 h-4 text-brand-muted shrink-0" />
+                                    <span className="text-sm font-mono font-bold text-navy bg-brand-bg px-2 py-0.5 rounded-md border border-brand-border">
+                                        {route.path}
+                                    </span>
+                                </div>
+                                {route.status === "Warning" && (
+                                    <p className="text-[10px] text-orange-600 font-bold mt-1.5 flex items-center gap-1">
+                                        <AlertTriangle className="w-3 h-3" /> {route.issue}
+                                    </p>
+                                )}
+                            </td>
+                            <td>
+                                <span className="text-xs text-brand-muted font-medium">{route.component}</span>
+                            </td>
+                            <td>
+                                <div className="flex flex-col gap-1.5 items-start">
+                                    <StatusBadge status={route.status} />
+                                    <span className={cn("text-[10px] font-black tracking-widest uppercase inline-flex", route.isDynamic ? "text-purple-600" : "text-brand-muted")}>
+                                        {route.isDynamic ? "Dynamic Segment" : "Static Route"}
+                                    </span>
+                                </div>
+                            </td>
+                            <td className="text-center">
+                                <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center border border-blue-100 mx-auto">
+                                    {route.ctas}
+                                </div>
+                            </td>
+                            <td className="text-right">
+                                <button
+                                    className="p-2 hover:bg-primary/10 rounded-lg transition-colors text-brand-muted hover:text-primary"
+                                    onClick={() => openDetail(route)}
+                                    title="View route settings"
+                                >
+                                    <Settings2 className="w-4 h-4" />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </DataTable>
             </div>
 
             {/* Register Route Modal */}
